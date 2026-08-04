@@ -10,14 +10,15 @@ const UNIT_HALF = UNIT/2;
 
 loadBean();
 
-function toGridPos(v) {
-    return v.scale(UNIT_INVERSE)
-}
+function toGridPos(v) { return v.scale(UNIT_INVERSE); }
 
-function fromGridPos(v) {
-    return v.scale(UNIT)
-}
+function fromGridPos(v) { return v.scale(UNIT); }
 
-function roundVec(v) {
-    return vec2(Math.round(v.x), Math.round(v.y))
+function roundVec(v) { return vec2(Math.round(v.x), Math.round(v.y)); }
+
+function toCSVPos(v) { return `${v.x},${v.y}`; }
+
+function fromCSVPos(s) {
+    let split = s.split(',');
+    return vec2(Number(split[0]), Number(split[1]));
 }

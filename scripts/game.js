@@ -27,6 +27,14 @@ const playerData = {
     speed: 10,
 }
 
+const livingCells = {
+    '4,2': {birthTick: 0},
+    '4,3': {birthTick: 0},
+    '4,4': {birthTick: 0},
+}
+
+let tickNumber = 0;
+
 onUpdate(() => {
     if (isMouseDown()) {
         let playerMouseDiff = mousePos().sub(
@@ -46,10 +54,10 @@ onUpdate(() => {
 
 onDraw(() => {
     fillGridSpace(playerData.pos, WHITE)
-    
-    fillGridSpace(vec2(2,3), RED)
-    fillGridSpace(vec2(3,-1), YELLOW)
-    fillGridSpace(vec2(5,), GREEN)
+
+    for (let [pos, data] of Object.entries(livingCells)) {
+        fillGridSpace(fromCSVPos(pos), RED)
+    }
 })
 
 
