@@ -2,6 +2,15 @@ scene("game", () => {
 
 
 
+function fillGridSpace(pos, color) {
+    drawRect({
+        width: UNIT,
+        height: UNIT,
+        pos: fromGridPos(pos.sub(0.5)),
+        color: color,
+    });
+}
+
 setCamPos(vec2(0,0))
 
 add([
@@ -21,7 +30,7 @@ const playerData = {
 onUpdate(() => {
     if (isMouseDown()) {
         let playerMouseDiff = mousePos().sub(
-            toScreen(fromGridPos(playerData.pos))
+            toScreen(fromGridPos(playerData.finePos))
         );
 
         playerData.velocity = playerMouseDiff.unit();
@@ -36,18 +45,11 @@ onUpdate(() => {
 })
 
 onDraw(() => {
-    drawRect({
-        width: UNIT,
-        height: UNIT,
-        pos: fromGridPos(playerData.pos.sub(0.5)),
-        color: WHITE,
-    });
-    drawRect({
-        width: 2,
-        height: 2,
-        pos: vec2(0,0),
-        color: RED,
-    });
+    fillGridSpace(playerData.pos, WHITE)
+    
+    fillGridSpace(vec2(2,3), RED)
+    fillGridSpace(vec2(3,-1), YELLOW)
+    fillGridSpace(vec2(5,), GREEN)
 })
 
 
