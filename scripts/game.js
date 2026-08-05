@@ -82,6 +82,7 @@ add([
 const playerData = {
     pos: vec2(0,0),
     finePos: vec2(0,0),
+    tail: [vec2(0,1), vec2(0,2), vec2(0), vec2(0), vec2(0)],
     direction: vec2(0,0),
     speed: 10,
 }
@@ -120,6 +121,8 @@ onKeyPress('.', () => {
 })
 
 onUpdate(() => {
+    let oldPlayerPos = playerData.pos;
+
     if (isMouseDown()) {
         let playerMouseDiff = mousePos().sub(
             toScreen(fromGridPos(playerData.finePos))
@@ -135,11 +138,21 @@ onUpdate(() => {
     );
     playerData.pos = roundVec(playerData.finePos);
 
+    if (oldPlayerPos.eq(playerData.pos) == false) {
+        playerData.tail.unshift(oldPlayerPos);
+        playerData.tail.pop();
+    }
+
     setCamPos(fromGridPos(playerData.finePos))
 })
 
 onDraw(() => {
+    for (let pos of playerData.tail) {
+        fillGridSpace(pos, rgb(120,120,150))
+    }
+    
     fillGridSpace(playerData.pos, WHITE)
+
 
     for (let [pos, data] of Object.entries(livingCells)) {
         fillGridSpace(
