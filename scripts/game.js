@@ -11,7 +11,65 @@ function fillGridSpace(pos, color) {
     });
 }
 
+function tickLife() {
+    // Get list of cells to tick
+
+    let cellsToTick = new Set();
+
+    for (let [pos, data] of Object.entries(livingCells)) {
+        let vecPos = fromCSVPos(pos);
+
+        for (let n of NEIGHBORS) {
+            let vecNeighbor = vecPos.add(n);
+            let csvNeighbor = toCSVPos(vecNeighbor);
+
+            cellsToTick.add(csvNeighbor);
+        }
+    }
+
+    // Tick all listed cells
+
+    let nextLivingCells = {};
+
+    for (let pos of cellsToTick) {
+        let vecPos = fromCSVPos(pos);
+        let livingNeighborCount = 0;
+
+        let thisCell = livingCells[pos];
+
+        for (let n of NEIGHBORS) {
+            let vecNeighbor = vecPos.add(n);
+            let csvNeighbor = toCSVPos(vecNeighbor);
+
+            if (livingCells[csvNeighbor]) {
+                livingNeighborCount++;
+            }
+        }
+
+        if (thisCell) {
+            // Is Alive
+            if (livingNeighborCount == 2 || livingNeighborCount == 3) {
+                // Survive S23
+                nextLivingCells[pos] = thisCell
+            }
+        } else {
+            // Is Dead
+            if (livingNeighborCount == 3) {
+                // Birth B3
+                nextLivingCells[pos] = {
+                    birthTick: tickNumber
+                }
+            }
+        }
+    }
+
+    livingCells = nextLivingCells;
+    tickNumber++;
+}
+
+
 setCamPos(vec2(0,0))
+
 
 add([
     rect(width(), height()),
@@ -27,13 +85,21 @@ const playerData = {
     speed: 10,
 }
 
-const livingCells = {
+let livingCells = {
     '4,2': {birthTick: 0},
     '4,3': {birthTick: 0},
     '4,4': {birthTick: 0},
+
+    '-14,2': {birthTick: 0},
+    '-15,2': {birthTick: 0},
+    '-16,2': {birthTick: 0},
+    '-14,3': {birthTick: 0},
+    '-15,4': {birthTick: 0},
 }
 
 let tickNumber = 0;
+
+loop(0.2, tickLife)
 
 onUpdate(() => {
     if (isMouseDown()) {
