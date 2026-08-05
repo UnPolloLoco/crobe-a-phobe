@@ -97,9 +97,26 @@ let livingCells = {
     '-15,4': {birthTick: 0},
 }
 
+livingCells = {}
+let s = 100
+for (let x = -s; x <= s; x++) {
+    for (let y = -s; y <= s; y++) {
+        if (Math.random() < 0.5) {
+            livingCells[`${x},${y}`] = {birthTick: 0}
+        }
+    }
+}
+
 let tickNumber = 0;
 
-loop(0.2, tickLife)
+loop(0.02, tickLife)
+
+onKeyPress(',', () => {
+    setCamScale(getCamScale().scale(1 - 0.2))
+})
+onKeyPress('.', () => {
+    setCamScale(getCamScale().scale(1 + 0.2))
+})
 
 onUpdate(() => {
     if (isMouseDown()) {
@@ -116,13 +133,15 @@ onUpdate(() => {
         playerData.velocity.scale(dt() * playerData.speed)
     );
     playerData.pos = roundVec(playerData.finePos);
+
+    setCamPos(fromGridPos(playerData.finePos))
 })
 
 onDraw(() => {
     fillGridSpace(playerData.pos, WHITE)
 
     for (let [pos, data] of Object.entries(livingCells)) {
-        fillGridSpace(fromCSVPos(pos), RED)
+        fillGridSpace(fromCSVPos(pos), rgb(0,0,150))
     }
 })
 

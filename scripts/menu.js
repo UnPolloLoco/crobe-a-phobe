@@ -10,11 +10,14 @@ add([
 ])
 
 add([
-    text('Click the bean to start')
+    text('Click the bean to start', {align:'right'}),
+    anchor('topright'),
+    pos(width(),0)
 ])
 
 const playButton = add([
     sprite('bean'),
+    color(BLUE),
     scale(6),
     pos(center()),
     anchor('center'),
