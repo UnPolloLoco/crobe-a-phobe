@@ -68,7 +68,8 @@ function tickLife() {
 }
 
 
-setCamPos(vec2(0,0))
+setCamPos(vec2(0))
+setCamScale(0.5)
 
 
 add([
@@ -109,7 +110,7 @@ for (let x = -s; x <= s; x++) {
 
 let tickNumber = 0;
 
-loop(0.02, tickLife)
+loop(0.1, tickLife)
 
 onKeyPress(',', () => {
     setCamScale(getCamScale().scale(1 - 0.2))
@@ -141,7 +142,14 @@ onDraw(() => {
     fillGridSpace(playerData.pos, WHITE)
 
     for (let [pos, data] of Object.entries(livingCells)) {
-        fillGridSpace(fromCSVPos(pos), rgb(0,0,150))
+        fillGridSpace(
+            fromCSVPos(pos), 
+            rgb(
+                0,
+                120 - 20 * (tickNumber - data.birthTick),
+                Math.max(120, 255 - 20 * (tickNumber - data.birthTick))
+            )
+        );
     }
 })
 
