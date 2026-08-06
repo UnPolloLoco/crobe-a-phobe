@@ -103,7 +103,7 @@ livingCells = {}
 let s = 100
 for (let x = -s; x <= s; x++) {
     for (let y = -s; y <= s; y++) {
-        if (Math.random() < 0.5) {
+        if (x*x + y*y > 15*15 && Math.random() < 0.5) {
             livingCells[`${x},${y}`] = {birthTick: 0}
         }
     }
@@ -118,6 +118,35 @@ onKeyPress(',', () => {
 })
 onKeyPress('.', () => {
     setCamScale(getCamScale().scale(1 + 0.2))
+})
+
+onKeyPress('space', () => {
+    // Summon soup orb (sourb)
+
+    let radius = 10;
+    let center = roundVec(
+        playerData.pos.add(
+            rand(-40,40),
+            rand(-40,40),
+        )
+    );
+
+
+    let n = center.y - radius;
+    let s = center.y + radius;
+    let e = center.x - radius;
+    let w = center.x + radius;
+
+    for (let x = e; x <= w; x++) {
+        for (let y = n; y <= s; y++) {
+            let isInRadius = (
+                (x - center.x)**2 + (y - center.y)**2 <= radius**2
+            );
+            if (isInRadius && Math.random() < 0.5) {
+                livingCells[`${x},${y}`] = {birthTick: 0}
+            }
+        }
+    }
 })
 
 onUpdate(() => {
