@@ -107,7 +107,7 @@ for (let x = -s; x <= s; x++) {
 
 let spawnWarnCells = {
     // '4,2': {birthTick: 0, willSpawn: true},
-    // '4,3': {birthTick: 0, willSpawn: false, fizzleOnTick: 1},
+    // '4,3': {birthTick: 0, willSpawn: false, fizzleOnTick: 1}, 
 }
 
 let tickNumber = 0;
