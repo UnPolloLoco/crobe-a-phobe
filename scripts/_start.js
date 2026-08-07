@@ -24,3 +24,5 @@ function fromCSVPos(s) {
     let split = s.split(',');
     return vec2(Number(split[0]), Number(split[1]));
 }
+
+function hsl(h,s,l) { return hsl2rgb(h/360, s, l); }
