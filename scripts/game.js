@@ -109,6 +109,11 @@ for (let x = -s; x <= s; x++) {
     }
 }
 
+let spawnWarnCells = {
+    '4,2': {birthTick: 0, willSpawn: true},
+    '4,3': {birthTick: 0, willSpawn: false},
+}
+
 let tickNumber = 0;
 
 loop(0.1, tickLife)
@@ -142,8 +147,11 @@ onKeyPress('space', () => {
             let isInRadius = (
                 (x - center.x)**2 + (y - center.y)**2 <= radius**2
             );
-            if (isInRadius && Math.random() < 0.5) {
-                livingCells[`${x},${y}`] = {birthTick: 0}
+            if (isInRadius) {
+                spawnWarnCells[`${x},${y}`] = {
+                    birthTick: tickNumber,
+                    willSpawn: (Math.random() < 0.5)
+                }
             }
         }
     }
@@ -176,20 +184,63 @@ onUpdate(() => {
 })
 
 onDraw(() => {
+    
+    // ------ Draw Warning Cells ------
+
+    for (let [pos, data] of Object.entries(spawnWarnCells)) {
+        let ticksElapsed = tickNumber - data.birthTick;
+        let fadeMulti;
+        let lifespan;
+
+        if (data.willSpawn) {
+            fadeMulti = (ticksElapsed % 8);
+            lifespan = 8 * 2;
+        } else {
+            fadeMulti = ticksElapsed;
+            lifespan = 8;
+        }
+
+        if (ticksElapsed >= lifespan) {
+            // Kill spawn warning cell
+            delete spawnWarnCells[pos];
+
+            if (data.willSpawn) { 
+                livingCells[pos] = {birthTick: tickNumber}
+            }
+
+        } else {
+            // Spawn warning cell is alive
+    
+            fillGridSpace(
+                fromCSVPos(pos), 
+                rgb(
+                    100 - 14*fadeMulti,
+                    20,
+                    30,
+                )
+            );
+        }
+    }
+
+    // ------ Draw Player Cells ------
+
     for (let pos of playerData.tail) {
         fillGridSpace(pos, rgb(120,120,150))
     }
     
     fillGridSpace(playerData.pos, WHITE)
 
+    // ------ Draw Living Cells ------
 
     for (let [pos, data] of Object.entries(livingCells)) {
+        let ticksElapsed = tickNumber - data.birthTick;
+
         fillGridSpace(
             fromCSVPos(pos), 
             rgb(
                 0,
-                120 - 20 * (tickNumber - data.birthTick),
-                Math.max(120, 255 - 20 * (tickNumber - data.birthTick))
+                120 - 20 * ticksElapsed,
+                Math.max(120, 255 - 20 * ticksElapsed)
             )
         );
     }
