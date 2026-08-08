@@ -80,11 +80,15 @@ add([
 ])
 
 const playerData = {
-    pos: vec2(0,0),
-    finePos: vec2(0,0),
+    pos: vec2(0),
+    finePos: vec2(0),
     tail: [/*list of vectors*/],
-    direction: vec2(0,0),
+    direction: vec2(0),
     speed: 10,
+    generalDirection: {
+        vec: vec2(0),
+        lastPos: vec2(0),
+    },
 }
 
 for (let i = 0; i < 12; i++) {
@@ -99,7 +103,7 @@ let livingCells = {
 let s = 100
 for (let x = -s; x <= s; x++) {
     for (let y = -s; y <= s; y++) {
-        if (x*x + y*y > 15*15 && Math.random() < 0.5) {
+        if (x*x + y*y > 22*22 && Math.random() < 0.5) {
             livingCells[`${x},${y}`] = {birthTick: 0}
         }
     }
@@ -114,14 +118,16 @@ let tickNumber = 0;
 
 loop(0.1, tickLife)
 
-loop(0.8, () => {
+loop(0.4, () => {
     // Summon soup orb (sourb)
 
     let radius = randi(5, 18);
     let center = roundVec(
         playerData.pos.add(
-            rand(-60,60),
-            rand(-60,60),
+            rand(-70,70),
+            rand(-70,70),
+        ).add(
+            playerData.generalDirection.vec
         )
     );
 
@@ -146,6 +152,34 @@ loop(0.8, () => {
                     fizzleOnTick: 1 + randi(3),
                 }
             }
+        }
+    }
+})
+
+loop(3, () => {
+    // Find general direcrtion
+
+    playerData.generalDirection.vec = playerData.pos.sub(
+        playerData.generalDirection.lastPos
+    ).scale(1.6);
+    playerData.generalDirection.lastPos = playerData.pos
+})
+    
+loop(8, () => {
+    // Delete far away cells
+    
+    for (let [pos, data] of Object.entries(livingCells)) {
+        let cell = fromCSVPos(pos);
+        let plyr = playerData.pos;
+        let distance;
+
+        distance = Math.max(
+            Math.abs(cell.x - plyr.x),
+            Math.abs(cell.y - plyr.y),
+        );
+
+        if (distance > DELETE_RADIUS) {
+            delete livingCells[pos];
         }
     }
 })
@@ -254,6 +288,15 @@ onDraw(() => {
             ),
         );
     }
+
+    drawRect({
+        width: 2*DELETE_RADIUS*UNIT, // 400 off
+        height: 2*DELETE_RADIUS*UNIT,
+        color: WHITE,
+        opacity: 0.03,
+        pos: playerData.pos.scale(UNIT),
+        anchor: 'center'
+    })
 })
 
 

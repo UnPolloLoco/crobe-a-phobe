@@ -10,6 +10,8 @@ const UNIT_HALF = UNIT/2;
 
 const NEIGHBORS = [vec2(0,1), vec2(1,1), vec2(1,0), vec2(1,-1), vec2(0,-1), vec2(-1,-1), vec2(-1,0), vec2(-1, 1)]
 
+const DELETE_RADIUS = 250;
+
 loadBean();
 
 function toGridPos(v) { return v.scale(UNIT_INVERSE); }
