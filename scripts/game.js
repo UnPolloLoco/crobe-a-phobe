@@ -67,6 +67,18 @@ function tickLife() {
     tickNumber++;
 }
 
+function collisionCheck() {
+    let playerParts = [...playerData.tail, playerData.pos]
+
+    for (let [cellPosCSV, data] of Object.entries(livingCells)) {
+        for (let playerCellPos of playerParts) {
+            if (cellPosCSV == toCSVPos(playerCellPos)) {
+                playerData.health -= rand(4,6);
+                healthLabel.text = Math.round(playerData.health);
+            }
+        }
+    }
+}
 
 setCamPos(vec2(0))
 setCamScale(0.5)
@@ -123,7 +135,10 @@ let spawnWarnCells = {
 
 let tickNumber = 0;
 
-loop(0.1, tickLife)
+loop(0.1, () => {
+    tickLife();
+    collisionCheck();
+})
 
 loop(0.4, () => {
     // Summon soup orb (sourb)
@@ -224,17 +239,6 @@ onUpdate(() => {
     }
 
     setCamPos(fromGridPos(playerData.finePos))
-
-    let playerParts = [...playerData.tail, playerData.pos]
-
-    for (let [cellPosCSV, data] of Object.entries(livingCells)) {
-        for (let playerCellPos of playerParts) {
-            if (cellPosCSV == toCSVPos(playerCellPos)) {
-                playerData.health -= 50 * dt();
-                healthLabel.text = Math.round(playerData.health);
-            }
-        }
-    }
 })
 
 onDraw(() => {
