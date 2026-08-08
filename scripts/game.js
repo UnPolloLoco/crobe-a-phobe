@@ -79,6 +79,12 @@ add([
     fixed(),
 ])
 
+const healthLabel = add([
+    text('1000'),
+    pos(50),
+    fixed(),
+])
+
 const playerData = {
     pos: vec2(0),
     finePos: vec2(0),
@@ -89,6 +95,7 @@ const playerData = {
         vec: vec2(0),
         lastPos: vec2(0),
     },
+    health: 1000,
 }
 
 for (let i = 0; i < 12; i++) {
@@ -217,6 +224,17 @@ onUpdate(() => {
     }
 
     setCamPos(fromGridPos(playerData.finePos))
+
+    let playerParts = [...playerData.tail, playerData.pos]
+
+    for (let [cellPosCSV, data] of Object.entries(livingCells)) {
+        for (let playerCellPos of playerParts) {
+            if (cellPosCSV == toCSVPos(playerCellPos)) {
+                playerData.health -= 50 * dt();
+                healthLabel.text = Math.round(playerData.health);
+            }
+        }
+    }
 })
 
 onDraw(() => {
@@ -289,14 +307,15 @@ onDraw(() => {
         );
     }
 
-    drawRect({
+    // Debug delete range
+    /*drawRect({
         width: 2*DELETE_RADIUS*UNIT, // 400 off
         height: 2*DELETE_RADIUS*UNIT,
         color: WHITE,
         opacity: 0.03,
         pos: playerData.pos.scale(UNIT),
         anchor: 'center'
-    })
+    })*/
 })
 
 
