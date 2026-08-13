@@ -48,13 +48,13 @@ function tickLife() {
 
         if (thisCell) {
             // Is Alive
-            if (livingNeighborCount == 2 || livingNeighborCount == 3) {
+            if ([2,3].includes(livingNeighborCount)) {
                 // Survive S23
                 nextLivingCells[pos] = thisCell
             }
         } else {
             // Is Dead
-            if (livingNeighborCount == 3) {
+            if ([3].includes(livingNeighborCount)) {
                 // Birth B3
                 nextLivingCells[pos] = {
                     birthTick: tickNumber
@@ -75,6 +75,42 @@ function collisionCheck() {
             if (cellPosCSV == toCSVPos(playerCellPos)) {
                 playerData.health -= rand(4,6);
                 healthLabel.text = Math.round(playerData.health);
+            }
+        }
+    }
+}
+
+function summonRandomSoupOrb() {
+    let radius = randi(5, 18);
+    let center = roundVec(
+        playerData.pos.add(
+            rand(-70,70),
+            rand(-70,70),
+        ).add(
+            playerData.generalDirection.vec
+        )
+    );
+
+
+    let n = center.y - radius;
+    let s = center.y + radius;
+    let e = center.x - radius;
+    let w = center.x + radius;
+
+    for (let x = e; x <= w; x++) {
+        for (let y = n; y <= s; y++) {
+            let isInRadius = (
+                (x - center.x)**2 + (y - center.y)**2 
+                <= (radius - 0.1)**2
+            );
+            let posCSV = `${x},${y}`;
+
+            if (isInRadius && spawnWarnCells[posCSV] == undefined) {
+                spawnWarnCells[posCSV] = {
+                    birthTick: tickNumber,
+                    willSpawn: (Math.random() < 0.5),
+                    fizzleOnTick: 1 + randi(3),
+                }
             }
         }
     }
@@ -141,41 +177,7 @@ loop(0.1, () => {
 })
 
 loop(0.4, () => {
-    // Summon soup orb (sourb)
-
-    let radius = randi(5, 18);
-    let center = roundVec(
-        playerData.pos.add(
-            rand(-70,70),
-            rand(-70,70),
-        ).add(
-            playerData.generalDirection.vec
-        )
-    );
-
-
-    let n = center.y - radius;
-    let s = center.y + radius;
-    let e = center.x - radius;
-    let w = center.x + radius;
-
-    for (let x = e; x <= w; x++) {
-        for (let y = n; y <= s; y++) {
-            let isInRadius = (
-                (x - center.x)**2 + (y - center.y)**2 
-                <= (radius - 0.1)**2
-            );
-            let posCSV = `${x},${y}`;
-
-            if (isInRadius && spawnWarnCells[posCSV] == undefined) {
-                spawnWarnCells[posCSV] = {
-                    birthTick: tickNumber,
-                    willSpawn: (Math.random() < 0.5),
-                    fizzleOnTick: 1 + randi(3),
-                }
-            }
-        }
-    }
+    summonRandomSoupOrb();
 })
 
 loop(3, () => {
