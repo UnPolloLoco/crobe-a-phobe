@@ -176,8 +176,10 @@ loop(0.1, () => {
     collisionCheck();
 })
 
-loop(0.4, () => {
-    summonRandomSoupOrb();
+wait(3, () => {
+    loop(0.4, () => {
+        summonRandomSoupOrb();
+    })
 })
 
 loop(3, () => {
