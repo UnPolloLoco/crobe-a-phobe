@@ -196,16 +196,16 @@ let tickNumber = 0;
 
 let totalDelay = 0;
 for (let i = 0; i < 100; i++) {
-    let thisDelay = 0.1 + 0.7 * (1.2)**(-i);
+    let thisDelay = TICK_DELAY + 0.7 * (1.2)**(-i);
     totalDelay += thisDelay;
 
-    if (thisDelay > 0.11) {
+    if (thisDelay > TICK_DELAY * 1.1) {
         // Slow start
         wait(totalDelay, tick);
     } else {
         // Begin normal tick rate
         wait(totalDelay, () => {
-            loop(0.1, tick);
+            loop(TICK_DELAY, tick);
         });
         break;
     }

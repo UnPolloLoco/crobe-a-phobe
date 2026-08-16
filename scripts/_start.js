@@ -12,6 +12,8 @@ const NEIGHBORS = [vec2(0,1), vec2(1,1), vec2(1,0), vec2(1,-1), vec2(0,-1), vec2
 
 const DELETE_RADIUS = 250;
 
+const TICK_DELAY = 0.1;
+
 loadBean();
 
 function toGridPos(v) { return v.scale(UNIT_INVERSE); }
