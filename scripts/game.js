@@ -2,12 +2,13 @@ scene("game", () => {
 
 
 
-function fillGridSpace(pos, color) {
+function fillGridSpace(pos, color, opacity=1) {
     drawRect({
         width: UNIT,
         height: UNIT,
         pos: fromGridPos(pos.sub(0.5)),
         color: color,
+        opacity: opacity,
     });
 }
 
@@ -75,6 +76,8 @@ function collisionCheck() {
             if (cellPosCSV == toCSVPos(playerCellPos)) {
                 playerData.health -= rand(4,6);
                 healthLabel.text = Math.round(playerData.health);
+
+                collisionWarnings[cellPosCSV] = {birthTick: tickNumber};
             }
         }
     }
@@ -153,6 +156,10 @@ for (let i = 0; i < 12; i++) {
 let livingCells = {
     // '4,2': {birthTick: 0},
     // '4,3': {birthTick: 0},
+}
+
+let collisionWarnings = {
+    // '4,2': {birthTick: 0},
 }
 
 let s = 100
@@ -247,7 +254,7 @@ onUpdate(() => {
 
 onDraw(() => {
     
-    // ------------ Draw Warning Cells ------------
+    // ------------ Draw Spawn Warnings ------------
 
     for (let [pos, data] of Object.entries(spawnWarnCells)) {
         let ticksElapsed = tickNumber - data.birthTick;
@@ -277,6 +284,7 @@ onDraw(() => {
                 Math.floor(ticksElapsed / 5)
             ];
 
+            // Same color as collision warning
             fillGridSpace(
                 fromCSVPos(pos), 
                 hsl(
@@ -312,6 +320,23 @@ onDraw(() => {
                 Math.min(0.8, 0.2 + ticksElapsed/12),
                 Math.min(0.85, 0.2 + ticksElapsed/8),
             ),
+        );
+    }
+
+    // ------------ Draw Collision Warnings ------------
+
+    for (let [pos, data] of Object.entries(collisionWarnings)) {
+        let ticksElapsed = tickNumber - data.birthTick;
+
+        // Same color as spawn warning
+        fillGridSpace(
+            fromCSVPos(pos), 
+            hsl(
+                340,
+                0.7,
+                0.38,
+            ),
+            opacity = (1 - ticksElapsed/4)
         );
     }
 
