@@ -4,7 +4,7 @@ kaboom({
     height: 720,
 });
 
-const UNIT = 30;
+const UNIT = 35;
 const UNIT_INVERSE = 1/UNIT;
 const UNIT_HALF = UNIT/2;
 

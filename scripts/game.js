@@ -2,6 +2,8 @@ scene("game", () => {
 
 
 
+const GAME = {time: 0};
+
 function fillGridSpace(pos, color, opacity=1) {
     drawRect({
         width: UNIT,
@@ -10,6 +12,11 @@ function fillGridSpace(pos, color, opacity=1) {
         color: color,
         opacity: opacity,
     });
+}
+
+function tick() {
+    tickLife();
+    collisionCheck();
 }
 
 function tickLife() {
@@ -120,7 +127,16 @@ function summonRandomSoupOrb() {
 }
 
 setCamPos(vec2(0))
-setCamScale(0.5)
+setCamScale(0.46)
+
+tween(
+    getCamScale(), vec2(0.5),
+    2.5,
+    (s) => {
+        setCamScale(s)
+    }, 
+    easings.easeInOutQuad
+);
 
 
 add([
@@ -178,12 +194,24 @@ let spawnWarnCells = {
 
 let tickNumber = 0;
 
-loop(0.1, () => {
-    tickLife();
-    collisionCheck();
-})
+let totalDelay = 0;
+for (let i = 0; i < 100; i++) {
+    let thisDelay = 0.1 + 0.7 * (1.2)**(-i);
+    totalDelay += thisDelay;
 
-wait(3, () => {
+    if (thisDelay > 0.11) {
+        // Slow start
+        wait(totalDelay, tick);
+    } else {
+        // Begin normal tick rate
+        wait(totalDelay, () => {
+            loop(0.1, tick);
+        });
+        break;
+    }
+}
+
+wait(5, () => {
     loop(0.4, () => {
         summonRandomSoupOrb();
     })
@@ -250,6 +278,8 @@ onUpdate(() => {
     }
 
     setCamPos(fromGridPos(playerData.finePos))
+
+    GAME.time += dt();
 })
 
 onDraw(() => {
@@ -312,13 +342,19 @@ onDraw(() => {
 
     for (let [pos, data] of Object.entries(livingCells)) {
         let ticksElapsed = tickNumber - data.birthTick;
+        let vecPos = fromCSVPos(pos);
+        let dist = vecPos.dist(vec2(0));
 
         fillGridSpace(
-            fromCSVPos(pos), 
+            vecPos, 
             hsl(
                 Math.min(315, 280 + ticksElapsed*10),
                 Math.min(0.8, 0.2 + ticksElapsed/12),
                 Math.min(0.85, 0.2 + ticksElapsed/8),
+            ),
+            opacity = Math.min(
+                1, 
+                (dist-20)/20 - 1 + 1.2*GAME.time
             ),
         );
     }
@@ -339,16 +375,6 @@ onDraw(() => {
             opacity = (1 - ticksElapsed/4)
         );
     }
-
-    // Debug delete range
-    /*drawRect({
-        width: 2*DELETE_RADIUS*UNIT, // 400 off
-        height: 2*DELETE_RADIUS*UNIT,
-        color: WHITE,
-        opacity: 0.03,
-        pos: playerData.pos.scale(UNIT),
-        anchor: 'center'
-    })*/
 })
 
 
