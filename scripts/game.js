@@ -2,7 +2,7 @@ scene("game", () => {
 
 
 
-const GAME = {time: 0};
+// -------------- GAME FUNCTIONS --------------
 
 function fillGridSpace(pos, color, opacity=1) {
     drawRect({
@@ -126,19 +126,26 @@ function summonRandomSoupOrb() {
     }
 }
 
+// -------------- SETUP --------------
+
+const GAME = {time: 0};
+
 setCamPos(vec2(0))
 setCamScale(0.46)
 
+// Zoom in camera on start
 tween(
     getCamScale(), vec2(0.5),
-    2.5,
+    1.5,
     (s) => {
         setCamScale(s)
     }, 
-    easings.easeInOutQuad
+    easings.easeInOutCubic
 );
 
+// -------------- SCENE --------------
 
+// Background
 add([
     rect(width(), height()),
     pos(0,0),
@@ -146,11 +153,14 @@ add([
     fixed(),
 ])
 
+// Health label
 const healthLabel = add([
     text('1000'),
     pos(50),
     fixed(),
 ])
+
+// -------------- PLAYER DATA --------------
 
 const playerData = {
     pos: vec2(0),
@@ -169,41 +179,53 @@ for (let i = 0; i < 12; i++) {
     playerData.tail.push(vec2(0, i))
 }
 
+// -------------- CELL DATA --------------
+
 let livingCells = {
-    // '4,2': {birthTick: 0},
-    // '4,3': {birthTick: 0},
+    // '4,1': {birthTick: 0},
+}
+
+let spawnWarnCells = {
+    // '4,1': {birthTick: 0, willSpawn: true},
+    // '6,7': {birthTick: 0, willSpawn: false, fizzleOnTick: 1}, 
 }
 
 let collisionWarnings = {
-    // '4,2': {birthTick: 0},
+    // '4,1': {birthTick: 0},
 }
+
+// -------------- INITAL SOUP --------------
 
 let s = 100
 for (let x = -s; x <= s; x++) {
     for (let y = -s; y <= s; y++) {
-        if (x*x + y*y > 22*22 && Math.random() < 0.5) {
+        let density = mapc(
+            Math.sqrt(x*x + y*y),
+            INITIAL_SOUP_START_RADIUS,
+            INITIAL_SOUP_FULL_START_RADIUS,
+            0,
+            0.5,
+        );
+        if (Math.random() < density) {
             livingCells[`${x},${y}`] = {birthTick: 0}
         }
     }
 }
 
-let spawnWarnCells = {
-    // '4,2': {birthTick: 0, willSpawn: true},
-    // '4,3': {birthTick: 0, willSpawn: false, fizzleOnTick: 1}, 
-}
+// -------------- TICKING --------------
 
 let tickNumber = 0;
-
 let totalDelay = 0;
+
 for (let i = 0; i < 100; i++) {
-    let thisDelay = TICK_DELAY + 0.7 * (1.2)**(-i);
+    let thisDelay = TICK_DELAY + 0.6 * (1.2)**(-i);
     totalDelay += thisDelay;
 
     if (thisDelay > TICK_DELAY * 1.1) {
         // Slow start
         wait(totalDelay, tick);
     } else {
-        // Begin normal tick rate
+        // Begin normal tick rate loop; end this loop
         wait(totalDelay, () => {
             loop(TICK_DELAY, tick);
         });
@@ -211,11 +233,15 @@ for (let i = 0; i < 100; i++) {
     }
 }
 
-wait(5, () => {
+// -------------- SOUP ORB SPAWNER --------------
+
+wait(6, () => {
     loop(0.4, () => {
         summonRandomSoupOrb();
     })
 })
+
+// -------------- GENERAL DIRECTION FINDER --------------
 
 loop(3, () => {
     // Find general direcrtion
@@ -225,6 +251,8 @@ loop(3, () => {
     ).scale(1.6);
     playerData.generalDirection.lastPos = playerData.pos
 })
+
+// -------------- CELL CLEANUP --------------
     
 loop(8, () => {
     // Delete far away cells
@@ -245,6 +273,7 @@ loop(8, () => {
     }
 })
 
+// -------------- CONTROLS --------------
 
 onKeyPress(',', () => {
     setCamScale(getCamScale().scale(1 - 0.2))
@@ -253,6 +282,7 @@ onKeyPress('.', () => {
     setCamScale(getCamScale().scale(1 + 0.2))
 })
 
+// -------------- UPDATE LOOP --------------
 
 onUpdate(() => {
     let oldPlayerPos = playerData.pos;
@@ -282,9 +312,11 @@ onUpdate(() => {
     GAME.time += dt();
 })
 
+// -------------- DRAW LOOP --------------
+
 onDraw(() => {
     
-    // ------------ Draw Spawn Warnings ------------
+    // --------- Draw Spawn Warnings ---------
 
     for (let [pos, data] of Object.entries(spawnWarnCells)) {
         let ticksElapsed = tickNumber - data.birthTick;
@@ -326,7 +358,7 @@ onDraw(() => {
         }
     }
 
-    // ------------ Draw Player Cells ------------
+    // --------- Draw Player Cells ---------
 
     for (let [index, pos] of playerData.tail.entries()) {
         fillGridSpace(pos, hsl(
@@ -338,7 +370,7 @@ onDraw(() => {
     
     fillGridSpace(playerData.pos, WHITE)
 
-    // ------------ Draw Living Cells ------------
+    // --------- Draw Living Cells ---------
 
     for (let [pos, data] of Object.entries(livingCells)) {
         let ticksElapsed = tickNumber - data.birthTick;
@@ -354,12 +386,12 @@ onDraw(() => {
             ),
             opacity = Math.min(
                 1, 
-                (dist-20)/20 - 1 + 1.2*GAME.time
+                (dist-20)/20 - 1 + 1.6*GAME.time
             ),
         );
     }
 
-    // ------------ Draw Collision Warnings ------------
+    // --------- Draw Collision Warnings ---------
 
     for (let [pos, data] of Object.entries(collisionWarnings)) {
         let ticksElapsed = tickNumber - data.birthTick;
@@ -378,5 +410,5 @@ onDraw(() => {
 })
 
 
-
+// End of scene
 });

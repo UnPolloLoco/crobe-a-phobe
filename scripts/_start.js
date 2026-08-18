@@ -4,7 +4,7 @@ kaboom({
     height: 720,
 });
 
-const UNIT = 35;
+const UNIT = 40;
 const UNIT_INVERSE = 1/UNIT;
 const UNIT_HALF = UNIT/2;
 
@@ -13,6 +13,9 @@ const NEIGHBORS = [vec2(0,1), vec2(1,1), vec2(1,0), vec2(1,-1), vec2(0,-1), vec2
 const DELETE_RADIUS = 250;
 
 const TICK_DELAY = 0.1;
+
+const INITIAL_SOUP_START_RADIUS = 15;
+const INITIAL_SOUP_FULL_START_RADIUS = 25;
 
 loadBean();
 
