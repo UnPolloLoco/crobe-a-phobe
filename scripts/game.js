@@ -15,6 +15,7 @@ function fillGridSpace(pos, color, opacity=1) {
 }
 
 function tick() {
+    tickNumber++;
     tickLife();
     collisionCheck();
 }
@@ -72,7 +73,6 @@ function tickLife() {
     }
 
     livingCells = nextLivingCells;
-    tickNumber++;
 }
 
 function collisionCheck() {
@@ -381,8 +381,8 @@ onDraw(() => {
             vecPos, 
             hsl(
                 Math.min(315, 280 + ticksElapsed*10),
-                Math.min(0.8, 0.2 + ticksElapsed/12),
-                Math.min(0.85, 0.2 + ticksElapsed/8),
+                Math.min(0.9, 0.4 + ticksElapsed/18),
+                Math.min(0.85, 0.3 + ticksElapsed/8),
             ),
             opacity = Math.min(
                 1, 
