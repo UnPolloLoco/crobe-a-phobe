@@ -5,7 +5,7 @@ scene("menu", () => {
 add([
     rect(width(), height()),
     pos(0,0),
-    color(hsl(280, 0.2, 0.1)),
+    color(BACKGROUND),
     fixed(),
 ])
 

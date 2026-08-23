@@ -4,18 +4,24 @@ kaboom({
     height: 720,
 });
 
+// ------------------ CONSTANTS ------------------
+
 const UNIT = 40;
 const UNIT_INVERSE = 1/UNIT;
 const UNIT_HALF = UNIT/2;
 
 const NEIGHBORS = [vec2(0,1), vec2(1,1), vec2(1,0), vec2(1,-1), vec2(0,-1), vec2(-1,-1), vec2(-1,0), vec2(-1, 1)]
 
-const DELETE_RADIUS = 250;
-
 const TICK_DELAY = 0.1;
+
+const DELETE_RADIUS = 250;
 
 const INITIAL_SOUP_START_RADIUS = 15;
 const INITIAL_SOUP_FULL_START_RADIUS = 25;
+
+const BACKGROUND = hsl(280, 0.2, 0.1);
+
+// ------------------ LOADS ------------------
 
 loadBean();
 
@@ -23,8 +29,10 @@ loadRoot('https://unpolloloco.github.io/crobe-a-phobe/sprites/');
 
 loadSprite('title', 'title.png', {
 	sliceY: 2,
-	anims: { 'wriggle': { from: 0, to: 1, speed: 3, loop: true } },
+	anims: { 'wriggle': { from: 0, to: 1, speed: 5, loop: true } },
 })
+
+// ------------------ GENERIC FUNCTIONS ------------------
 
 function toGridPos(v) { return v.scale(UNIT_INVERSE); }
 
