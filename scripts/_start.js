@@ -19,6 +19,13 @@ const INITIAL_SOUP_FULL_START_RADIUS = 25;
 
 loadBean();
 
+loadRoot('https://unpolloloco.github.io/crobe-a-phobe/sprites/');
+
+loadSprite('title', 'title.png', {
+	sliceY: 2,
+	anims: { 'wriggle': { from: 0, to: 1, speed: 3, loop: true } },
+})
+
 function toGridPos(v) { return v.scale(UNIT_INVERSE); }
 
 function fromGridPos(v) { return v.scale(UNIT); }

@@ -5,29 +5,31 @@ scene("menu", () => {
 add([
     rect(width(), height()),
     pos(0,0),
-    color(rgb(12, 20, 30)),
+    color(hsl(280, 0.2, 0.1)),
     fixed(),
 ])
 
-add([
-    text('Click the bean to start', {align:'right'}),
-    anchor('topright'),
-    pos(width(),0)
-])
-
 const playButton = add([
-    sprite('bean'),
+    rect(200,65),
     color(BLUE),
-    scale(6),
-    pos(center()),
+    pos(center().add(0, 150)),
     anchor('center'),
     area(),
+])
+
+playButton.add([
+    text('start')
 ])
 
 playButton.onClick(() => {
     go('game')
 })
 
+add([
+    sprite('title', { anim: 'wriggle' }),
+    pos(center().sub(0, 70)),
+    anchor('center')
+])
 
 
 });
