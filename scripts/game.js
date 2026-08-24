@@ -109,16 +109,19 @@ function summonRandomSoupOrb() {
 
     for (let x = e; x <= w; x++) {
         for (let y = n; y <= s; y++) {
-            let isInRadius = (
-                (x - center.x)**2 + (y - center.y)**2 
-                <= (radius - 0.1)**2
-            );
+            let dist = Math.sqrt((x - center.x)**2 + (y - center.y)**2);
+            let unitDist = dist / radius;
+            let isInRadius = (dist <= (radius - 0.1));
+
             let posCSV = `${x},${y}`;
+
+            let spawnChance = Math.min(0.5, 0.5 - 0.5*(unitDist**4));
 
             if (isInRadius && spawnWarnCells[posCSV] == undefined) {
                 spawnWarnCells[posCSV] = {
                     birthTick: tickNumber,
-                    willSpawn: (Math.random() < 0.5),
+                    willSpawn: (Math.random() < spawnChance),
+                    opacity: rand(0.4, 0.8) + spawnChance,
                     fizzleOnTick: 1 + randi(3),
                 }
             }
@@ -186,8 +189,8 @@ let livingCells = {
 }
 
 let spawnWarnCells = {
-    // '4,1': {birthTick: 0, willSpawn: true},
-    // '6,7': {birthTick: 0, willSpawn: false, fizzleOnTick: 1}, 
+    // '4,1': {birthTick: 0, willSpawn: true, opacity: 0.67},
+    // '6,7': {birthTick: 0, willSpawn: false, opacity: 0.41, fizzleOnTick: 1}, 
 }
 
 let collisionWarnings = {
@@ -353,7 +356,8 @@ onDraw(() => {
                     320 + 20 * pulseTaper,
                     0.4 + 0.3 * pulseTaper,
                     0.1 + 0.8 * pulseTaper * pulseStrengths,
-                )
+                ),
+                opacity = data.opacity,
             );
         }
     }

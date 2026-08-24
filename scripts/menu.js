@@ -42,9 +42,9 @@ playButton.onHoverEnd(() => {
 
     playButton.scaleTween = tween(
         playButton.scale, vec2(1),
-        0.3,
+        0.2,
         (s) => { playButton.scale = s; },
-        easings.easeOutElastic,
+        easings.easeOutCubic,
     )
 })
 
