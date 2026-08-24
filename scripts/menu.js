@@ -10,19 +10,50 @@ add([
 ])
 
 const playButton = add([
-    rect(200,65),
-    color(BLUE),
+    sprite('playButton', { anim: 'wriggle' }),
     pos(center().add(0, 150)),
     anchor('center'),
-    area(),
-])
-
-playButton.add([
-    text('start')
+    area({ scale: 0.6 }),
+    scale(1),
+    {
+        scaleTween: null,
+        hoverScale: 1.04,
+        hoverSpeed: 6,
+    }
 ])
 
 playButton.onClick(() => {
     go('game')
+})
+
+playButton.onHover(() => {
+    if (playButton.scaleTween) { playButton.scaleTween.cancel() };
+
+    playButton.scaleTween = tween(
+        playButton.scale, vec2(playButton.hoverScale),
+        0.3,
+        (s) => { playButton.scale = s; },
+        easings.easeOutElastic,
+    )
+})
+
+playButton.onHoverEnd(() => {
+    if (playButton.scaleTween) { playButton.scaleTween.cancel() };
+
+    playButton.scaleTween = tween(
+        playButton.scale, vec2(1),
+        0.3,
+        (s) => { playButton.scale = s; },
+        easings.easeOutElastic,
+    )
+})
+
+playButton.onUpdate(() => {
+    if (playButton.isHovering()) {
+        playButton.animSpeed = playButton.hoverSpeed;
+    } else {
+        playButton.animSpeed = 1;
+    }
 })
 
 add([
