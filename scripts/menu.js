@@ -31,6 +31,22 @@ add([
     anchor('center')
 ])
 
+const titleOverlay = add([
+    sprite('titleOverlay' /* animated later */),
+    pos(center().sub(0, 70)),
+    anchor('center')
+])
+
+for (let i = 0; i < 5; i++) {
+    wait(0.1 + (i+1)*0.08, () => {
+        if (i == 4) {
+            destroy(titleOverlay);
+        } else {
+            titleOverlay.frame++;
+        }
+
+    })
+}
 
 });
 go('menu')

@@ -32,6 +32,10 @@ loadSprite('title', 'title.png', {
 	anims: { 'wriggle': { from: 0, to: 1, speed: 5, loop: true } },
 })
 
+loadSprite('titleOverlay', 'title_overlay.png', {
+	sliceY: 5,
+})
+
 // ------------------ GENERIC FUNCTIONS ------------------
 
 function toGridPos(v) { return v.scale(UNIT_INVERSE); }
