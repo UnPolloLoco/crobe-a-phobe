@@ -81,9 +81,7 @@ function collisionCheck() {
     for (let [cellPosCSV, data] of Object.entries(livingCells)) {
         for (let playerCellPos of playerParts) {
             if (cellPosCSV == toCSVPos(playerCellPos)) {
-                playerData.health -= rand(4,6);
-                healthLabel.text = Math.round(playerData.health);
-
+                takeDamage();
                 collisionWarnings[cellPosCSV] = {birthTick: tickNumber};
             }
         }
@@ -129,21 +127,41 @@ function summonRandomSoupOrb() {
     }
 }
 
+function takeDamage() {
+    playerData.health -= rand(4,6);
+    healthLabel.text = Math.round(playerData.health);
+}
+
+function updateCamera() {
+    // DO NOT use setCamPos or setCamScale elsewhere, edit CAMERA object instead
+    setCamPos(CAMERA.pos);
+    setCamScale(CAMERA.scale);
+}
+
 // -------------- SETUP --------------
 
 const GAME = {time: 0};
 
-setCamPos(vec2(0))
-setCamScale(0.46)
+const CAMERA = {
+    pos: vec2(0),
+    scale: vec2(1),
+};
+
+// Use inital camera settings
+
+updateCamera();
 
 // Zoom in camera on start
+
+CAMERA.scale = 0.93;
+
 tween(
-    getCamScale(), vec2(0.5),
-    1.5,
+    CAMERA.scale, 1,
+    1.8,
     (s) => {
-        setCamScale(s)
+        CAMERA.scale = s;
     }, 
-    easings.easeInOutCubic
+    easings.easeInOutQuart
 );
 
 // -------------- SCENE --------------
@@ -225,7 +243,7 @@ for (let i = 0; i < 100; i++) {
     totalDelay += thisDelay;
 
     if (thisDelay > TICK_DELAY * 1.1) {
-        // Slow start
+        // Slow intro ticking
         wait(totalDelay, tick);
     } else {
         // Begin normal tick rate loop; end this loop
@@ -279,10 +297,10 @@ loop(8, () => {
 // -------------- CONTROLS --------------
 
 onKeyPress(',', () => {
-    setCamScale(getCamScale().scale(1 - 0.2))
+    CAMERA.scale /= 1.2;
 })
 onKeyPress('.', () => {
-    setCamScale(getCamScale().scale(1 + 0.2))
+    CAMERA.scale *= 1.2;
 })
 
 // -------------- UPDATE LOOP --------------
@@ -310,8 +328,13 @@ onUpdate(() => {
         playerData.tail.pop();
     }
 
-    setCamPos(fromGridPos(playerData.finePos))
+    // Move camera to player
 
+    CAMERA.pos = fromGridPos(playerData.finePos);
+    
+    // Update camera and time
+
+    updateCamera();
     GAME.time += dt();
 })
 

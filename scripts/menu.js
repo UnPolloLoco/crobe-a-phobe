@@ -17,8 +17,8 @@ const playButton = add([
     scale(1),
     {
         scaleTween: null,
-        hoverScale: 1.04,
-        hoverSpeed: 6,
+        hoverScale: 1.05,
+        hoverSpeed: 7,
     }
 ])
 
@@ -69,7 +69,7 @@ const titleOverlay = add([
 ])
 
 for (let i = 0; i < 5; i++) {
-    wait(0.1 + (i+1)*0.08, () => {
+    wait(0.09 + (i+1)*0.06, () => {
         if (i == 4) {
             destroy(titleOverlay);
         } else {

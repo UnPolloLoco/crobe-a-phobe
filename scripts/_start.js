@@ -6,7 +6,7 @@ kaboom({
 
 // ------------------ CONSTANTS ------------------
 
-const UNIT = 40;
+const UNIT = 20;
 const UNIT_INVERSE = 1/UNIT;
 const UNIT_HALF = UNIT/2;
 
