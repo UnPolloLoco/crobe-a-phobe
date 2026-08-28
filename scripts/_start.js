@@ -13,6 +13,7 @@ const UNIT_HALF = UNIT/2;
 const NEIGHBORS = [vec2(0,1), vec2(1,1), vec2(1,0), vec2(1,-1), vec2(0,-1), vec2(-1,-1), vec2(-1,0), vec2(-1, 1)]
 
 const TICK_DELAY = 0.1;
+const TICK_FADE_RATE = 1.2; // Time to fade into next tick mutliplier
 
 const DELETE_RADIUS = 250;
 

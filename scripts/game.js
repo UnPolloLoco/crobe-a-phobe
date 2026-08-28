@@ -16,6 +16,7 @@ function fillGridSpace(pos, color, opacity=1) {
 
 function tick() {
     tickNumber++;
+    timeSinceTick = 0;
     tickLife();
     collisionCheck();
 }
@@ -49,17 +50,21 @@ function tickLife() {
         for (let n of NEIGHBORS) {
             let vecNeighbor = vecPos.add(n);
             let csvNeighbor = toCSVPos(vecNeighbor);
+            let neighbor = livingCells[csvNeighbor]
 
-            if (livingCells[csvNeighbor]) {
+            if (neighbor && !neighbor.isDead) {
                 livingNeighborCount++;
             }
         }
 
-        if (thisCell) {
+        if (thisCell && !thisCell.isDead) {
             // Is Alive
             if ([2,3].includes(livingNeighborCount)) {
                 // Survive S23
-                nextLivingCells[pos] = thisCell
+                nextLivingCells[pos] = thisCell;
+            } else {
+                // Already alive and doesnt survive
+                nextLivingCells[pos] = {...thisCell, isDead:true};
             }
         } else {
             // Is Dead
@@ -253,6 +258,7 @@ for (let i = 0; i < 12; i++) {
 
 let livingCells = {
     // '4,1': {birthTick: 0},
+    // '3,2': {birthTick: 0, isDead:true},
 }
 
 let spawnWarnCells = {
@@ -286,6 +292,7 @@ for (let x = -s; x <= s; x++) {
 
 let tickNumber = 0;
 let totalDelay = 0;
+let timeSinceTick = 0;
 
 for (let i = 0; i < 100; i++) {
     let thisDelay = TICK_DELAY + 0.4 * (1.6)**(-i);
@@ -385,6 +392,7 @@ onUpdate(() => {
 
     updateCamera();
     GAME.time += dt();
+    timeSinceTick += dt();
 })
 
 // -------------- DRAW LOOP --------------
@@ -453,6 +461,12 @@ onDraw(() => {
         let vecPos = fromCSVPos(pos);
         let dist = vecPos.dist(vec2(0));
 
+        let birthFadeMulti = data.birthTick == tickNumber ? Math.min(1, timeSinceTick / TICK_DELAY * TICK_FADE_RATE) : 1;
+        let deathFadeMulti = data.isDead ? Math.max(0, 1 - timeSinceTick / TICK_DELAY * TICK_FADE_RATE) : 1;
+        let introFadeMulti = Math.min(1, (dist-20)/20 - 1 + 1.6*GAME.time);
+
+        if (data.isDead) { ticksElapsed--; } // Makes sure dying cells don't flash a brighter color
+
         fillGridSpace(
             vecPos, 
             hsl(
@@ -460,10 +474,7 @@ onDraw(() => {
                 Math.min(0.9, 0.4 + ticksElapsed/18),
                 Math.min(0.85, 0.3 + ticksElapsed/8),
             ),
-            opacity = Math.min(
-                1, 
-                (dist-20)/20 - 1 + 1.6*GAME.time
-            ),
+            opacity = birthFadeMulti * deathFadeMulti * introFadeMulti,
         );
     }
 
