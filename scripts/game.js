@@ -164,8 +164,13 @@ function updateCamera() {
         }
 
         shakeOffset = vec2(
-            rand(-maxStrength, maxStrength),
-            rand(-maxStrength, maxStrength),
+            rand(-1,1),
+            rand(-1,1),
+        ).scale(
+            maxStrength
+        ).scale(
+            1,
+            0.56
         );
     }
 
@@ -283,7 +288,7 @@ let tickNumber = 0;
 let totalDelay = 0;
 
 for (let i = 0; i < 100; i++) {
-    let thisDelay = TICK_DELAY + 0.6 * (1.2)**(-i);
+    let thisDelay = TICK_DELAY + 0.4 * (1.6)**(-i);
     totalDelay += thisDelay;
 
     if (thisDelay > TICK_DELAY * 1.1) {
