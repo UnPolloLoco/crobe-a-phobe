@@ -76,16 +76,19 @@ function tickLife() {
 }
 
 function collisionCheck() {
-    let playerParts = [...playerData.tail, playerData.pos]
+    let playerParts = [...playerData.tail, playerData.pos];
+    let touchCount = 0;
 
     for (let [cellPosCSV, data] of Object.entries(livingCells)) {
         for (let playerCellPos of playerParts) {
             if (cellPosCSV == toCSVPos(playerCellPos)) {
-                takeDamage();
+                touchCount++;
                 collisionWarnings[cellPosCSV] = {birthTick: tickNumber};
             }
         }
     }
+
+    if (touchCount > 0) { takeDamage(touchCount); }
 }
 
 function summonRandomSoupOrb() {
@@ -127,15 +130,55 @@ function summonRandomSoupOrb() {
     }
 }
 
-function takeDamage() {
-    playerData.health -= rand(4,6);
+function takeDamage(amount) {
+    playerData.health -= 5 * amount;
     healthLabel.text = Math.round(playerData.health);
+
+    let shakeStrength = mapc(
+        amount,
+        1, 7,   // touch amount
+        2, 8    // shake strength
+    );
+
+    addCamShake(shakeStrength, 0.2);
 }
 
 function updateCamera() {
+    // Shake
+    let shakeOffset = vec2(0);
+
+    if (CAMERA.shake != []) { 
+        let maxStrength = 0;
+        let indexOfMaxStrength = null;
+
+        for (let [index, data] of Object.entries(CAMERA.shake)) {
+            if (data.endTime < GAME.time) {
+                // Delete shake if expired
+                delete CAMERA.shake[index];
+
+            } else if (data.strength > maxStrength) { 
+                // Set new max strength if bigger
+                maxStrength = data.strength;
+                indexOfMaxStrength = index;
+            }
+        }
+
+        shakeOffset = vec2(
+            rand(-maxStrength, maxStrength),
+            rand(-maxStrength, maxStrength),
+        );
+    }
+
     // DO NOT use setCamPos or setCamScale elsewhere, edit CAMERA object instead
-    setCamPos(CAMERA.pos);
+    setCamPos(CAMERA.pos.add(shakeOffset));
     setCamScale(CAMERA.scale);
+}
+
+function addCamShake(strength, duration) {
+    CAMERA.shake.push({
+        strength: strength,
+        endTime: GAME.time + duration,
+    })
 }
 
 // -------------- SETUP --------------
@@ -145,6 +188,7 @@ const GAME = {time: 0};
 const CAMERA = {
     pos: vec2(0),
     scale: vec2(1),
+    shake: [ /* {strength: 0, endTime: 0}, */ ], // Use addCamShake()
 };
 
 // Use inital camera settings
