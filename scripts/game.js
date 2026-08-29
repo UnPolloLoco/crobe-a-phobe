@@ -489,7 +489,7 @@ onDraw(() => {
             hsl(
                 340,
                 0.7,
-                0.38,
+                0.38 + 0.12 * Math.sin(30 * (GAME.time + data.birthTick)),
             ),
             opacity = (1 - ticksElapsed/4)
         );
