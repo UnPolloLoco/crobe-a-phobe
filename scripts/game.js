@@ -70,8 +70,11 @@ function tickLife() {
             // Is Dead
             if ([3].includes(livingNeighborCount)) {
                 // Birth B3
-                nextLivingCells[pos] = {
-                    birthTick: tickNumber
+                if (!foodCells[pos]) {
+                    // Do not spawn cell if it will overlap with food
+                    nextLivingCells[pos] = {
+                        birthTick: tickNumber
+                    }
                 }
             }
         }
@@ -270,6 +273,18 @@ let collisionWarnings = {
     // '4,1': {birthTick: 0},
 }
 
+let foodCells = {
+    '4,1': {},
+    '4,2': {},
+    '4,3': {},
+    '5,1': {},
+    '5,2': {},
+    '5,3': {},
+    '6,1': {},
+    '6,2': {},
+    '6,3': {},
+}
+
 // -------------- INITAL SOUP --------------
 
 let s = 100
@@ -384,6 +399,17 @@ onUpdate(() => {
         playerData.tail.pop();
     }
 
+    // Check if head overlaps with food
+
+    if (foodCells[toCSVPos(playerData.pos)]) {
+        debug.log('chomp');
+        
+        playerData.health += 100;
+        healthLabel.text = Math.round(playerData.health);
+
+        delete foodCells[toCSVPos(playerData.pos)];
+    }
+
     // Move camera to player
 
     CAMERA.pos = fromGridPos(playerData.finePos);
@@ -454,12 +480,18 @@ onDraw(() => {
     
     fillGridSpace(playerData.pos, WHITE)
 
-    // --------- Draw Living Cells ---------
+    // --------- Draw 'Crobe Cells ---------
 
     for (let [pos, data] of Object.entries(livingCells)) {
         let ticksElapsed = tickNumber - data.birthTick;
         let vecPos = fromCSVPos(pos);
         let dist = vecPos.dist(vec2(0));
+
+        // Delete any cells that overlap with food
+        if (foodCells[pos]) {
+            delete livingCells[pos];
+            continue;
+        }
 
         let birthFadeMulti = data.birthTick == tickNumber ? Math.min(1, timeSinceTick / TICK_DELAY * TICK_FADE_RATE) : 1;
         let deathFadeMulti = data.isDead ? Math.max(0, 1 - timeSinceTick / TICK_DELAY * TICK_FADE_RATE) : 1;
@@ -475,6 +507,24 @@ onDraw(() => {
                 Math.min(0.85, 0.3 + ticksElapsed/8),
             ),
             opacity = birthFadeMulti * deathFadeMulti * introFadeMulti,
+        );
+    }
+
+    // --------- Draw Food ---------
+
+    for (let [pos, data] of Object.entries(foodCells)) {
+        let ticksElapsed = tickNumber - data.birthTick;
+        let vecPos = fromCSVPos(pos);
+
+        let shimmer = Math.sin(-(vecPos.x + vecPos.y) + 10*GAME.time);
+
+        fillGridSpace(
+            vecPos, 
+            hsl(
+                55 + 5*shimmer, 
+                0.9 - 0.1*shimmer,
+                0.65 + 0.18*shimmer
+            ),
         );
     }
 
