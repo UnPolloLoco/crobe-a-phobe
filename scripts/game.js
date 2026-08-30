@@ -377,9 +377,12 @@ onKeyPress('.', () => {
 // -------------- UPDATE LOOP --------------
 
 onUpdate(() => {
+
+    // Player movement
+
     let oldPlayerPos = playerData.pos;
 
-    if (isMouseDown()) {
+    if (isMouseDown() && GAME.time > 0.2) {
         let playerMouseDiff = mousePos().sub(
             toScreen(fromGridPos(playerData.finePos))
         );
