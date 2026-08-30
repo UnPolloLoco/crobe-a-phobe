@@ -403,7 +403,7 @@ onUpdate(() => {
 
     if (foodCells[toCSVPos(playerData.pos)]) {
         debug.log('chomp');
-        
+
         playerData.health += 100;
         healthLabel.text = Math.round(playerData.health);
 
@@ -516,14 +516,15 @@ onDraw(() => {
         let ticksElapsed = tickNumber - data.birthTick;
         let vecPos = fromCSVPos(pos);
 
-        let shimmer = Math.sin(-(vecPos.x + vecPos.y) + 10*GAME.time);
+        let shimmer = Math.sin(-(vecPos.x + vecPos.y) + 8*GAME.time);
 
         fillGridSpace(
             vecPos, 
             hsl(
-                55 + 5*shimmer, 
-                0.9 - 0.1*shimmer,
-                0.65 + 0.18*shimmer
+                140 + 20*shimmer, 
+                0.75, //0.9 - 0.1*shimmer,
+                // 0.7 + 0.18*shimmer,
+                0.86 + 0.14*(1 - 2**(1 + shimmer))  
             ),
         );
     }
