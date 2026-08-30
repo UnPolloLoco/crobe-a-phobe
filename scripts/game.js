@@ -482,6 +482,7 @@ onDraw(() => {
 
     for (let [pos, data] of Object.entries(collisionWarnings)) {
         let ticksElapsed = tickNumber - data.birthTick;
+        let opacity = (1 - ticksElapsed/4);
 
         // Same color as spawn warning
         fillGridSpace(
@@ -491,8 +492,11 @@ onDraw(() => {
                 0.7,
                 0.38 + 0.12 * Math.sin(30 * (GAME.time + data.birthTick)),
             ),
-            opacity = (1 - ticksElapsed/4)
+            opacity = opacity
         );
+
+        // Delete invisible collision warnings
+        if (opacity < 0) { delete collisionWarnings[pos] }
     }
 })
 

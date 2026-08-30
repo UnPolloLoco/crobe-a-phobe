@@ -69,7 +69,7 @@ const titleOverlay = add([
 ])
 
 for (let i = 0; i < 5; i++) {
-    wait(0.09 + (i+1)*0.06, () => {
+    wait(0.09 + (i+1)*0.075, () => {
         if (i == 4) {
             destroy(titleOverlay);
         } else {
