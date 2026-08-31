@@ -10,7 +10,8 @@ const UNIT = 20;
 const UNIT_INVERSE = 1/UNIT;
 const UNIT_HALF = UNIT/2;
 
-const NEIGHBORS = [vec2(0,1), vec2(1,1), vec2(1,0), vec2(1,-1), vec2(0,-1), vec2(-1,-1), vec2(-1,0), vec2(-1, 1)]
+const NEIGHBORS = [vec2(0,1), vec2(1,1), vec2(1,0), vec2(1,-1), vec2(0,-1), vec2(-1,-1), vec2(-1,0), vec2(-1, 1)];
+const DIRECT_NEIGHBORS = [vec2(0,1), vec2(1,0), vec2(0,-1), vec2(-1,0)];
 
 const TICK_DELAY = 0.1;
 const TICK_FADE_RATE = 1.2; // Time to fade into next tick mutliplier

@@ -274,15 +274,15 @@ let collisionWarnings = {
 }
 
 let foodCells = {
-    '4,1': {},
-    '4,2': {},
-    '4,3': {},
-    '5,1': {},
-    '5,2': {},
-    '5,3': {},
-    '6,1': {},
-    '6,2': {},
-    '6,3': {},
+    '4,1': {dimTick: 0},
+    '4,2': {dimTick: 0},
+    '4,3': {dimTick: 0},
+    '5,1': {dimTick: 0},
+    '5,2': {dimTick: 0},
+    '5,3': {dimTick: 0},
+    '6,1': {dimTick: 0},
+    '6,2': {dimTick: 0},
+    '6,3': {dimTick: 0},
 }
 
 // -------------- INITAL SOUP --------------
@@ -410,6 +410,15 @@ onUpdate(() => {
         playerData.health += 100;
         healthLabel.text = Math.round(playerData.health);
 
+        for (n of DIRECT_NEIGHBORS) {
+            let vecNeighbor = playerData.pos.add(n);
+            let csvNeighbor = toCSVPos(vecNeighbor);
+
+            if (foodCells[csvNeighbor]) {
+                foodCells[csvNeighbor].dimTick = tickNumber;
+            }
+        }
+
         delete foodCells[toCSVPos(playerData.pos)];
     }
 
@@ -516,18 +525,18 @@ onDraw(() => {
     // --------- Draw Food ---------
 
     for (let [pos, data] of Object.entries(foodCells)) {
-        let ticksElapsed = tickNumber - data.birthTick;
+        let ticksElapsed = tickNumber - data.dimTick;
         let vecPos = fromCSVPos(pos);
 
         let shimmer = Math.sin(-(vecPos.x + vecPos.y) + 8*GAME.time);
+        let dimAmount = 0.5 + 0.5*Math.min(1, ticksElapsed/8)
 
         fillGridSpace(
             vecPos, 
             hsl(
-                140 + 20*shimmer, 
-                0.75, //0.9 - 0.1*shimmer,
-                // 0.7 + 0.18*shimmer,
-                0.86 + 0.14*(1 - 2**(1 + shimmer))  
+                150 + Math.max(0, 20*shimmer), 
+                0.75,
+                dimAmount * (0.86 + 0.14*(1 - 2**(1 + shimmer)))
             ),
         );
     }
@@ -536,7 +545,9 @@ onDraw(() => {
 
     for (let [pos, data] of Object.entries(collisionWarnings)) {
         let ticksElapsed = tickNumber - data.birthTick;
+        
         let opacity = (1 - ticksElapsed/4);
+        let pulse = 0.12 * Math.sin(30 * (GAME.time + data.birthTick));
 
         // Same color as spawn warning
         fillGridSpace(
@@ -544,7 +555,7 @@ onDraw(() => {
             hsl(
                 340,
                 0.7,
-                0.38 + 0.12 * Math.sin(30 * (GAME.time + data.birthTick)),
+                0.38 + pulse,
             ),
             opacity = opacity
         );
