@@ -10,7 +10,12 @@ const UNIT = 20;
 const UNIT_INVERSE = 1/UNIT;
 const UNIT_HALF = UNIT/2;
 
+const CHECKER_CHUNK_SIZE = 4;
+const CHECKER_GRID_WIDTH = 20;
+const CHECKER_CHUNK_TRUE_WIDTH = UNIT * CHECKER_GRID_WIDTH * CHECKER_CHUNK_SIZE;
+
 const NEIGHBORS = [vec2(0,1), vec2(1,1), vec2(1,0), vec2(1,-1), vec2(0,-1), vec2(-1,-1), vec2(-1,0), vec2(-1, 1)];
+const INCLUSIVE_NEIGHBORS = [...NEIGHBORS, vec2(0)];
 const DIRECT_NEIGHBORS = [vec2(0,1), vec2(1,0), vec2(0,-1), vec2(-1,0)];
 
 const TICK_DELAY = 0.1;
@@ -48,6 +53,8 @@ function toGridPos(v) { return v.scale(UNIT_INVERSE); }
 function fromGridPos(v) { return v.scale(UNIT); }
 
 function roundVec(v) { return vec2(Math.round(v.x), Math.round(v.y)); }
+
+function floorVec(v) { return vec2(Math.floor(v.x), Math.floor(v.y)); }
 
 function toCSVPos(v) { return `${v.x},${v.y}`; }
 

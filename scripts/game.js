@@ -436,7 +436,38 @@ onUpdate(() => {
 // -------------- DRAW LOOP --------------
 
 onDraw(() => {
-    
+
+    // --------- Draw Checkered Background ---------
+
+    // A "checker chunk" is a 4x4 region of the background checkerboard pattern
+
+    let centralCheckerChunkPos = floorVec(
+        fromGridPos(playerData.pos).scale(1 / CHECKER_CHUNK_TRUE_WIDTH)
+    );
+
+    let trueWidth = CHECKER_GRID_WIDTH * UNIT;
+    for (let chunkNum = 0; chunkNum < 9; chunkNum++) {
+        let thisCheckerChunkPos = centralCheckerChunkPos.add(INCLUSIVE_NEIGHBORS[chunkNum]);
+        let offset = thisCheckerChunkPos.scale(CHECKER_CHUNK_TRUE_WIDTH);
+
+        for (let x = 0; x < CHECKER_CHUNK_SIZE; x++) {
+            for (let y = 0; y < CHECKER_CHUNK_SIZE; y++) {
+                if ((x+y) % 2 == 0) {
+                    drawRect({
+                        pos: offset.add(
+                            trueWidth*x - UNIT_HALF, 
+                            trueWidth*y - UNIT_HALF
+                        ),
+                        width: trueWidth,
+                        height: trueWidth,
+                        color: BLACK,
+                        opacity: 0.15
+                    })
+                }
+            }
+        }
+    }
+
     // --------- Draw Spawn Warnings ---------
 
     for (let [pos, data] of Object.entries(spawnWarnCells)) {
