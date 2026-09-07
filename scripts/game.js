@@ -529,7 +529,21 @@ onDraw(() => {
             );
         }
 
-        fillGridSpace(pos, color);
+        let normHealth = Math.max(0, playerData.cellsHealth[index] / PLAYER_CELL_MAX_HEALTH); // cell health 0 to 1
+
+        let fadeMin = map(normHealth, 0,1, 
+            0.6, 0
+        );
+        let fadeMax = map(normHealth, 0,1, 
+            0.85, 0
+        );
+        let pulseSpeed = map(normHealth, 0,1,
+            10, 3
+        );
+
+        let opacity = 1 - fadeMin - (fadeMax-fadeMin) * (Math.sin(GAME.time * pulseSpeed - index/7))**2
+
+        fillGridSpace(pos, color, opacity=opacity);
 
         // temp
         drawText({
@@ -537,6 +551,7 @@ onDraw(() => {
             pos: fromGridPos(pos.sub(0.5)),
             size: UNIT * 0.6,
             color: BLACK,
+            opacity: 0,
         })
     }
 
