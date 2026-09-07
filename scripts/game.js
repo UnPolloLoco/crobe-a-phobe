@@ -141,9 +141,26 @@ function summonRandomSoupOrb() {
 
 function takeDamage(touchedCells) {
     let totalAmount = touchedCells.length;
+    let cutAfter = 'none';
 
     for (let index of touchedCells) {
         playerData.cellsHealth[index] -= 5;
+
+        if (playerData.cellsHealth[index] <= 0) {
+            if (index == 0) {
+                alert('DEATH');
+            }
+
+            if (cutAfter == 'none' || cutAfter > index) {
+                cutAfter = index;
+            }
+        }
+    }
+
+    if (cutAfter != 'none') {
+        playerData.cellsPos.length = cutAfter;
+        playerData.cellsHealth.length = cutAfter;
+        debug.log('CHOP')
     }
 
     let shakeStrength = mapc(
