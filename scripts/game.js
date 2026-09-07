@@ -84,25 +84,26 @@ function tickLife() {
 }
 
 function collisionCheck() {
-    let playerParts = [...playerData.tail, playerData.pos];
-    let touchCount = 0;
+    let touchedCells = [/* list of list index numbers */];
 
     for (let [cellPosCSV, data] of Object.entries(livingCells)) {
-        for (let playerCellPos of playerParts) {
+        if (data.isDead) { continue }
+        for (let [index, playerCellPos] of playerData.cellsPos.entries()) {
             if (cellPosCSV == toCSVPos(playerCellPos)) {
-                touchCount++;
                 collisionWarnings[cellPosCSV] = {birthTick: tickNumber};
+                
+                touchedCells.push(index);
             }
         }
     }
 
-    if (touchCount > 0) { takeDamage(touchCount); }
+    if (touchedCells.length > 0) { takeDamage(touchedCells); }
 }
 
 function summonRandomSoupOrb() {
     let radius = randi(5, 18);
     let center = roundVec(
-        playerData.pos.add(
+        playerData.cellsPos[0].add(
             rand(-70,70),
             rand(-70,70),
         ).add(
@@ -138,14 +139,17 @@ function summonRandomSoupOrb() {
     }
 }
 
-function takeDamage(amount) {
-    playerData.health -= 5 * amount;
-    healthLabel.text = Math.round(playerData.health);
+function takeDamage(touchedCells) {
+    let totalAmount = touchedCells.length;
+
+    for (let index of touchedCells) {
+        playerData.cellsHealth[index] -= 5;
+    }
 
     let shakeStrength = mapc(
-        amount,
+        totalAmount,
         1, 7,   // touch amount
-        2, 8    // shake strength
+        4, 9    // shake strength
     );
 
     addCamShake(shakeStrength, 0.2);
@@ -231,30 +235,23 @@ add([
     fixed(),
 ])
 
-// Health label
-const healthLabel = add([
-    text('1000'),
-    pos(50),
-    fixed(),
-])
-
 // -------------- PLAYER DATA --------------
 
 const playerData = {
-    pos: vec2(0),
-    finePos: vec2(0),
-    tail: [/*list of vectors*/],
+    cellsPos: [/*list of vectors*/],        // first cell is the head
+    cellsHealth: [/*list of numbers*/],     // first cell is the head
+    finePos: vec2(0),                       // exact head pos
     direction: vec2(0),
     speed: 10,
     generalDirection: {
         vec: vec2(0),
         lastPos: vec2(0),
     },
-    health: 1000,
 }
 
 for (let i = 0; i < 12; i++) {
-    playerData.tail.push(vec2(0, i))
+    playerData.cellsPos.push(vec2(0, i));
+    playerData.cellsHealth.push(PLAYER_CELL_MAX_HEALTH);
 }
 
 // -------------- CELL DATA --------------
@@ -338,10 +335,10 @@ wait(6, () => {
 loop(3, () => {
     // Find general direcrtion
 
-    playerData.generalDirection.vec = playerData.pos.sub(
+    playerData.generalDirection.vec = playerData.cellsPos[0].sub(
         playerData.generalDirection.lastPos
     ).scale(1.6);
-    playerData.generalDirection.lastPos = playerData.pos
+    playerData.generalDirection.lastPos = playerData.cellsPos[0]
 })
 
 // -------------- CELL CLEANUP --------------
@@ -351,7 +348,7 @@ loop(8, () => {
     
     for (let [pos, data] of Object.entries(livingCells)) {
         let cell = fromCSVPos(pos);
-        let plyr = playerData.pos;
+        let plyr = playerData.cellsPos[0];
         let distance;
 
         distance = Math.max(
@@ -380,8 +377,6 @@ onUpdate(() => {
 
     // Player movement
 
-    let oldPlayerPos = playerData.pos;
-
     if (isMouseDown() && GAME.time > 0.2) {
         let playerMouseDiff = mousePos().sub(
             toScreen(fromGridPos(playerData.finePos))
@@ -395,23 +390,28 @@ onUpdate(() => {
     playerData.finePos = playerData.finePos.add(
         playerData.velocity.scale(dt() * playerData.speed)
     );
-    playerData.pos = roundVec(playerData.finePos);
+    let nextHeadPos = roundVec(playerData.finePos)
 
-    if (oldPlayerPos.eq(playerData.pos) == false) {
-        playerData.tail.unshift(oldPlayerPos);
-        playerData.tail.pop();
+    if (nextHeadPos.eq(playerData.cellsPos[0]) == false) {
+        playerData.cellsPos.unshift(nextHeadPos);
+        playerData.cellsPos.pop();
     }
 
     // Check if head overlaps with food
 
-    if (foodCells[toCSVPos(playerData.pos)]) {
-        debug.log('chomp');
+    if (foodCells[toCSVPos(playerData.cellsPos[0])]) {
+        // Healing
+        for (let i = 0; i < playerData.cellsPos.length; i++) {
+            playerData.cellsHealth[i] += 5;
 
-        playerData.health += 100;
-        healthLabel.text = Math.round(playerData.health);
+            if (playerData.cellsHealth[i] > PLAYER_CELL_MAX_HEALTH) {
+                playerData.cellsHealth[i] = PLAYER_CELL_MAX_HEALTH
+            }
+        }
 
+        // Dim nearby food
         for (n of DIRECT_NEIGHBORS) {
-            let vecNeighbor = playerData.pos.add(n);
+            let vecNeighbor = playerData.cellsPos[0].add(n);
             let csvNeighbor = toCSVPos(vecNeighbor);
 
             if (foodCells[csvNeighbor]) {
@@ -419,7 +419,8 @@ onUpdate(() => {
             }
         }
 
-        delete foodCells[toCSVPos(playerData.pos)];
+        // Remove food cell from data
+        delete foodCells[toCSVPos(playerData.cellsPos[0])];
     }
 
     // Move camera to player
@@ -442,7 +443,7 @@ onDraw(() => {
     // A "checker chunk" is a 4x4 region of the background checkerboard pattern
 
     let centralCheckerChunkPos = floorVec(
-        fromGridPos(playerData.pos).scale(1 / CHECKER_CHUNK_TRUE_WIDTH)
+        fromGridPos(playerData.cellsPos[0]).scale(1 / CHECKER_CHUNK_TRUE_WIDTH)
     );
 
     let trueWidth = CHECKER_GRID_WIDTH * UNIT;
@@ -513,15 +514,31 @@ onDraw(() => {
 
     // --------- Draw Player Cells ---------
 
-    for (let [index, pos] of playerData.tail.entries()) {
-        fillGridSpace(pos, hsl(
-            Math.max(20, 60 - index * 2), 
-            0.9, 
-            0.5
-        ));
+    for (let [index, pos] of playerData.cellsPos.entries()) {
+        let color;
+
+        if (index == 0) {
+            // Head
+            color = WHITE;
+        } else {
+            // Body
+            color = hsl(
+                Math.max(20, 60 - index * 2), 
+                0.9, 
+                0.5
+            );
+        }
+
+        fillGridSpace(pos, color);
+
+        // temp
+        drawText({
+            text: playerData.cellsHealth[index],
+            pos: fromGridPos(pos.sub(0.5)),
+            size: UNIT * 0.6,
+            color: BLACK,
+        })
     }
-    
-    fillGridSpace(playerData.pos, WHITE)
 
     // --------- Draw 'Crobe Cells ---------
 

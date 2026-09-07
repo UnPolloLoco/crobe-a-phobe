@@ -21,12 +21,14 @@ const DIRECT_NEIGHBORS = [vec2(0,1), vec2(1,0), vec2(0,-1), vec2(-1,0)];
 const TICK_DELAY = 0.1;
 const TICK_FADE_RATE = 1.2; // Time to fade into next tick mutliplier
 
-const DELETE_RADIUS = 250;
+const DELETE_RADIUS = 200;
 
 const INITIAL_SOUP_START_RADIUS = 15;
 const INITIAL_SOUP_FULL_START_RADIUS = 25;
 
 const BACKGROUND = hsl(280, 0.2, 0.1);
+
+const PLAYER_CELL_MAX_HEALTH = 100;
 
 // ------------------ LOADS ------------------
 
