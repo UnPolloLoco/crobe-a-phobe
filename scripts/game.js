@@ -158,6 +158,13 @@ function takeDamage(touchedCells) {
     }
 
     if (cutAfter != 'none') {
+        for (let index in playerData.cellsPos) {
+            if (index >= cutAfter) {
+                playerData.deadCellsPos.push(
+                    playerData.cellsPos[index]
+                );
+            }
+        }
         playerData.cellsPos.length = cutAfter;
         playerData.cellsHealth.length = cutAfter;
         debug.log('CHOP')
@@ -215,6 +222,24 @@ function addCamShake(strength, duration) {
     })
 }
 
+function getPlayerCellOpacity(health, index) {
+    // cell health 0 to 1
+    let normHealth = Math.max(0, health / PLAYER_CELL_MAX_HEALTH); 
+
+    let fadeMin = map(normHealth, 0,1, 
+        0.6, 0
+    );
+    let fadeMax = map(normHealth, 0,1, 
+        0.85, 0
+    );
+    let pulseSpeed = map(normHealth, 0,1,
+        10, 3
+    );
+
+    let opacity = 1 - fadeMin - (fadeMax-fadeMin) * (Math.sin(GAME.time * pulseSpeed - index/7))**2
+    return opacity;
+}
+
 // -------------- SETUP --------------
 
 const GAME = {time: 0};
@@ -257,6 +282,7 @@ add([
 const playerData = {
     cellsPos: [/*list of vectors*/],        // first cell is the head
     cellsHealth: [/*list of numbers*/],     // first cell is the head
+    deadCellsPos: [/*list of vectors*/],    // dead/disconnected former player cells
     finePos: vec2(0),                       // exact head pos
     direction: vec2(0),
     speed: 10,
@@ -529,6 +555,12 @@ onDraw(() => {
         }
     }
 
+    // --------- Draw DEAD Player Cells ---------
+
+    for (let [index, pos] of playerData.deadCellsPos.entries()) {
+        fillGridSpace(pos, hsl(20, 0.9, 0.5), opacity = getPlayerCellOpacity(0,0));
+    }
+
     // --------- Draw Player Cells ---------
 
     for (let [index, pos] of playerData.cellsPos.entries()) {
@@ -546,30 +578,14 @@ onDraw(() => {
             );
         }
 
-        let normHealth = Math.max(0, playerData.cellsHealth[index] / PLAYER_CELL_MAX_HEALTH); // cell health 0 to 1
-
-        let fadeMin = map(normHealth, 0,1, 
-            0.6, 0
+        fillGridSpace(
+            pos, 
+            color, 
+            opacity = getPlayerCellOpacity(
+                playerData.cellsHealth[index], 
+                index
+            )
         );
-        let fadeMax = map(normHealth, 0,1, 
-            0.85, 0
-        );
-        let pulseSpeed = map(normHealth, 0,1,
-            10, 3
-        );
-
-        let opacity = 1 - fadeMin - (fadeMax-fadeMin) * (Math.sin(GAME.time * pulseSpeed - index/7))**2
-
-        fillGridSpace(pos, color, opacity=opacity);
-
-        // temp
-        drawText({
-            text: playerData.cellsHealth[index],
-            pos: fromGridPos(pos.sub(0.5)),
-            size: UNIT * 0.6,
-            color: BLACK,
-            opacity: 0,
-        })
     }
 
     // --------- Draw 'Crobe Cells ---------
