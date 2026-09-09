@@ -222,6 +222,24 @@ function addCamShake(strength, duration) {
     })
 }
 
+function getPlayerCellColor(index) {
+    let color;
+
+    if (index == 0) {
+        // Head
+        color = WHITE;
+    } else {
+        // Body
+        color = hsl(
+            Math.max(20, 60 - index * 2), 
+            0.9, 
+            0.5
+        );
+    }
+
+    return color;
+}
+
 function getPlayerCellOpacity(health, index) {
     // cell health 0 to 1
     let normHealth = Math.max(0, health / PLAYER_CELL_MAX_HEALTH); 
@@ -558,29 +576,15 @@ onDraw(() => {
     // --------- Draw DEAD Player Cells ---------
 
     for (let [index, pos] of playerData.deadCellsPos.entries()) {
-        fillGridSpace(pos, hsl(20, 0.9, 0.5), opacity = getPlayerCellOpacity(0,0));
+        fillGridSpace(pos, getPlayerCellColor(999), opacity = getPlayerCellOpacity(0,0));
     }
 
     // --------- Draw Player Cells ---------
 
     for (let [index, pos] of playerData.cellsPos.entries()) {
-        let color;
-
-        if (index == 0) {
-            // Head
-            color = WHITE;
-        } else {
-            // Body
-            color = hsl(
-                Math.max(20, 60 - index * 2), 
-                0.9, 
-                0.5
-            );
-        }
-
         fillGridSpace(
             pos, 
-            color, 
+            getPlayerCellColor(index), 
             opacity = getPlayerCellOpacity(
                 playerData.cellsHealth[index], 
                 index
