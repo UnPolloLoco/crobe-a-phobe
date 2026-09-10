@@ -29,6 +29,10 @@ const INITIAL_SOUP_FULL_START_RADIUS = 25;
 const BACKGROUND = hsl(280, 0.2, 0.1);
 
 const PLAYER_CELL_MAX_HEALTH = 100;
+const PLAYER_INITIAL_CELL_POSITIONS = [
+    vec2(0,0), vec2(0,1), vec2(0,2), vec2(1,2), vec2(2,3), vec2(2,4),
+    vec2(2,5), vec2(1,6), vec2(0,6), vec2(-1,5), vec2(-1,4), vec2(0,4),
+];
 
 // ------------------ LOADS ------------------
 
@@ -46,7 +50,7 @@ loadSprite('playButton', 'play.png', {
     anims: { 'wriggle': { from: 0, to: 1, speed: 1.3, loop: true } },
 });
 
-loadSprite('titleOverlay', 'title_overlay.png', { sliceY: 5 });
+loadSprite('titleOverlay', 'title_overlay.png', { sliceY: 5 }); // animated manually
 
 // ------------------ GENERIC FUNCTIONS ------------------
 

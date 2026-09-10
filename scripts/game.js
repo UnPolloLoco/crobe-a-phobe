@@ -258,6 +258,21 @@ function getPlayerCellOpacity(health, index) {
     return opacity;
 }
 
+function extendPlayer(forcePos=null) {
+    let newCellPos;
+
+    if (forcePos) {
+        newCellPos = forcePos;
+    } else {
+        let endCellPos = playerData.cellsPos.at(-1);
+        if (endCellPos == undefined) { console.error('extendPlayer() used on nonexistant player') }
+        newCellPos = endCellPos.add(0,1);
+    }
+
+    playerData.cellsPos.push(newCellPos);
+    playerData.cellsHealth.unshift(PLAYER_CELL_MAX_HEALTH);
+}
+
 // -------------- SETUP --------------
 
 const GAME = {time: 0};
@@ -310,9 +325,10 @@ const playerData = {
     },
 }
 
-for (let i = 0; i < 12; i++) {
-    playerData.cellsPos.push(vec2(0, i));
-    playerData.cellsHealth.push(PLAYER_CELL_MAX_HEALTH);
+// Build body
+
+for (let pos of PLAYER_INITIAL_CELL_POSITIONS) {
+    extendPlayer(forcePos = pos);
 }
 
 // -------------- CELL DATA --------------
@@ -430,6 +446,10 @@ onKeyPress(',', () => {
 })
 onKeyPress('.', () => {
     CAMERA.scale *= 1.2;
+})
+
+onKeyPress('e', () => {
+    extendPlayer();
 })
 
 // -------------- UPDATE LOOP --------------
@@ -568,7 +588,7 @@ onDraw(() => {
                     0.4 + 0.3 * pulseTaper,
                     0.1 + 0.8 * pulseTaper * pulseStrengths,
                 ),
-                opacity = data.opacity,
+                data.opacity,
             );
         }
     }
@@ -576,7 +596,7 @@ onDraw(() => {
     // --------- Draw DEAD Player Cells ---------
 
     for (let [index, pos] of playerData.deadCellsPos.entries()) {
-        fillGridSpace(pos, getPlayerCellColor(999), opacity = getPlayerCellOpacity(0,0));
+        fillGridSpace(pos, getPlayerCellColor(999), getPlayerCellOpacity(0,0));
     }
 
     // --------- Draw Player Cells ---------
@@ -585,7 +605,7 @@ onDraw(() => {
         fillGridSpace(
             pos, 
             getPlayerCellColor(index), 
-            opacity = getPlayerCellOpacity(
+            getPlayerCellOpacity(
                 playerData.cellsHealth[index], 
                 index
             )
@@ -618,7 +638,7 @@ onDraw(() => {
                 Math.min(0.9, 0.4 + ticksElapsed/18),
                 Math.min(0.85, 0.3 + ticksElapsed/8),
             ),
-            opacity = birthFadeMulti * deathFadeMulti * introFadeMulti,
+            birthFadeMulti * deathFadeMulti * introFadeMulti,
         );
     }
 
@@ -657,7 +677,7 @@ onDraw(() => {
                 0.7,
                 0.38 + pulse,
             ),
-            opacity = opacity
+            opacity
         );
 
         // Delete invisible collision warnings
