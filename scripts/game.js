@@ -317,8 +317,9 @@ const playerData = {
     cellsHealth: [/*list of numbers*/],     // first cell is the head
     deadCellsPos: [/*list of vectors*/],    // dead/disconnected former player cells
     finePos: vec2(0),                       // exact head pos
-    direction: vec2(0),
     speed: 10,
+    storedFood: 0,
+    direction: vec2(0),
     generalDirection: {
         vec: vec2(0),
         lastPos: vec2(0),
@@ -482,13 +483,38 @@ onUpdate(() => {
 
     if (foodCells[toCSVPos(playerData.cellsPos[0])]) {
         // Healing
+        let totalHealing = 0;
+
         for (let i = 0; i < playerData.cellsPos.length; i++) {
-            playerData.cellsHealth[i] += 5;
+            let healAmount = FOOD_HEAL_AMOUNT;
+
+            let oldHealth = playerData.cellsHealth[i];
+            playerData.cellsHealth[i] += healAmount;
 
             if (playerData.cellsHealth[i] > PLAYER_CELL_MAX_HEALTH) {
                 playerData.cellsHealth[i] = PLAYER_CELL_MAX_HEALTH
             }
+
+            let newHealth = playerData.cellsHealth[i];
+            let actualAmountHealed = newHealth - oldHealth;
+
+            totalHealing += actualAmountHealed;
         }
+
+        let maxPossibleHealing = playerData.cellsPos.length * FOOD_HEAL_AMOUNT;
+
+        let healingdNormalized = totalHealing / maxPossibleHealing; // 0 to 1 what fraction of potential healing was done
+        let wastedHealingNormalized = 1 - healingdNormalized; // 0 to 1 how much potential healing was not done
+
+        // Store all eaten food (normalized!) that was not used for healing
+        playerData.storedFood += wastedHealingNormalized;
+
+        while (playerData.storedFood >= STORED_FOOD_HEAL_THRESHOLD) {
+            playerData.storedFood -= STORED_FOOD_HEAL_THRESHOLD;
+            extendPlayer()
+            debug.log('EXTENSION')
+        }
+
 
         // Dim nearby food
         for (n of DIRECT_NEIGHBORS) {

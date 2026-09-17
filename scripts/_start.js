@@ -34,6 +34,9 @@ const PLAYER_INITIAL_CELL_POSITIONS = [
     vec2(2,5), vec2(1,6), vec2(0,6), vec2(-1,5), vec2(-1,4), vec2(0,4),
 ];
 
+const FOOD_HEAL_AMOUNT = 10;
+const STORED_FOOD_HEAL_THRESHOLD = 3;
+
 // ------------------ LOADS ------------------
 
 loadBean();
