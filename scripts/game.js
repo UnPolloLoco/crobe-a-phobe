@@ -273,6 +273,15 @@ function extendPlayer(forcePos=null) {
     playerData.cellsHealth.unshift(PLAYER_CELL_MAX_HEALTH);
 }
 
+function summonFoodChunk(topLeftPos, size) {
+    for (let x = 0; x < size; x++) {
+        for (let y = 0; y < size; y++) {
+            let pos = topLeftPos.add(x, y);
+            foodCells[toCSVPos(pos)] = {dimTick: -999}
+        }
+    }
+}
+
 // -------------- SETUP --------------
 
 const GAME = {time: 0};
@@ -349,16 +358,12 @@ let collisionWarnings = {
 }
 
 let foodCells = {
-    '4,1': {dimTick: 0},
-    '4,2': {dimTick: 0},
-    '4,3': {dimTick: 0},
-    '5,1': {dimTick: 0},
-    '5,2': {dimTick: 0},
-    '5,3': {dimTick: 0},
-    '6,1': {dimTick: 0},
-    '6,2': {dimTick: 0},
-    '6,3': {dimTick: 0},
+    // '4,1': {dimTick: 0},
 }
+
+summonFoodChunk(vec2(4,1), 3)
+summonFoodChunk(vec2(-10,-3), 4)
+summonFoodChunk(vec2(20,-10), 15)
 
 // -------------- INITAL SOUP --------------
 

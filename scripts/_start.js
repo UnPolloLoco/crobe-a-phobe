@@ -28,14 +28,14 @@ const INITIAL_SOUP_FULL_START_RADIUS = 25;
 
 const BACKGROUND = hsl(280, 0.2, 0.1);
 
-const PLAYER_CELL_MAX_HEALTH = 100;
 const PLAYER_INITIAL_CELL_POSITIONS = [
     vec2(0,0), vec2(0,1), vec2(0,2), vec2(1,2), vec2(2,3), vec2(2,4),
     vec2(2,5), vec2(1,6), vec2(0,6), vec2(-1,5), vec2(-1,4), vec2(0,4),
 ];
 
+const PLAYER_CELL_MAX_HEALTH = 100;
 const FOOD_HEAL_AMOUNT = 10;
-const STORED_FOOD_HEAL_THRESHOLD = 3;
+const STORED_FOOD_HEAL_THRESHOLD = 2.5;
 
 // ------------------ LOADS ------------------
 
