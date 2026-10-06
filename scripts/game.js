@@ -274,11 +274,33 @@ function extendPlayer(forcePos=null) {
 }
 
 function summonFoodChunk(topLeftPos, size) {
+    // Check for potential overlap
+
+    let id = Math.random();
+    let newFoodCells = {};
+    let hasOverlap = false;
+
     for (let x = 0; x < size; x++) {
         for (let y = 0; y < size; y++) {
             let pos = topLeftPos.add(x, y);
-            foodCells[toCSVPos(pos)] = {dimTick: -999}
+            CSVpos = toCSVPos(pos);
+
+            newFoodCells[CSVpos] = {
+                dimTick: -999,
+                id: id
+            }
+
+            if (foodCells[CSVpos]) { hasOverlap = true; }
         }
+    }
+
+    if (hasOverlap) return; // Cancel all creation if food exists here already
+
+    foodCells = {...foodCells, ...newFoodCells}
+
+    foodChunksID[id] = {
+        amount: size**2,
+        pos: topLeftPos
     }
 }
 
@@ -358,10 +380,16 @@ let collisionWarnings = {
 }
 
 let foodCells = {
-    // '4,1': {dimTick: 0},
+    // '4,1': {dimTick: 0, id: 67},
+}
+let foodChunksID = {
+    // This is for tracking each clump of food as a single object
+    // 67: {amount: 9, pos: vec2},
 }
 
 summonFoodChunk(vec2(4,1), 3)
+summonFoodChunk(vec2(4,0), 3) // overlap
+summonFoodChunk(vec2(4,3), 3) // overlap
 summonFoodChunk(vec2(-10,-3), 4)
 summonFoodChunk(vec2(20,-10), 15)
 
