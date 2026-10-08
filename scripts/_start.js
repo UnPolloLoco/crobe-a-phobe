@@ -34,8 +34,13 @@ const PLAYER_INITIAL_CELL_POSITIONS = [
 ];
 
 const PLAYER_CELL_MAX_HEALTH = 100;
+const STORED_FOOD_HEAL_THRESHOLD = 3;
+
 const FOOD_HEAL_AMOUNT = 10;
-const STORED_FOOD_HEAL_THRESHOLD = 2.5;
+const MAX_FOOD_CHUNKS = 3;
+const FOOD_SPAWN_RADIUS = 130;
+const FOOD_DELETE_RADIUS = 150;
+const FOOD_CHUNK_SIZE_RANGE = [2,3];
 
 // ------------------ LOADS ------------------
 

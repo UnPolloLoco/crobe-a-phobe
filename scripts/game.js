@@ -294,7 +294,8 @@ function summonFoodChunk(topLeftPos, size) {
         }
     }
 
-    if (hasOverlap) return; // Cancel all creation if food exists here already
+    if (hasOverlap) return; // Cancel creation if food exists here already
+    if (false /*gridIsOnScreen(topLeftPos, margin=5)*/) return; // Cancel creation if spawnpoint visible
 
     foodCells = {...foodCells, ...newFoodCells}
 
@@ -387,12 +388,6 @@ let foodChunksID = {
     // 67: {amount: 9, pos: vec2},
 }
 
-summonFoodChunk(vec2(4,1), 3)
-summonFoodChunk(vec2(4,0), 3) // overlap
-summonFoodChunk(vec2(4,3), 3) // overlap
-summonFoodChunk(vec2(-10,-3), 4)
-summonFoodChunk(vec2(20,-10), 15)
-
 // -------------- INITAL SOUP --------------
 
 let s = 100
@@ -441,15 +436,44 @@ wait(6, () => {
     })
 })
 
-// -------------- GENERAL DIRECTION FINDER --------------
-
 loop(3, () => {
-    // Find general direcrtion
+    // -------------- GENERAL DIRECTION FINDER --------------
 
     playerData.generalDirection.vec = playerData.cellsPos[0].sub(
         playerData.generalDirection.lastPos
     ).scale(1.6);
     playerData.generalDirection.lastPos = playerData.cellsPos[0]
+
+    // -------------- FOOD DESPAWNER --------------
+
+    let headPos = playerData.cellsPos[0];
+
+    for (let [id, data] of Object.entries(foodChunksID)) {
+        if (data.pos.dist(headPos) > FOOD_DELETE_RADIUS) {
+            delete foodChunksID[id]
+
+            // Delete all corresponding cells
+            for (let [pos, data] of Object.entries(foodCells)) {
+                if (data.id == id) {
+                    delete foodCells[pos];
+                }
+            }
+        }
+    }
+
+    // -------------- FOOD SPAWNER --------------
+
+    if (Object.keys(foodChunksID).length < MAX_FOOD_CHUNKS) {
+        // If less than max food chunks, make another one
+        let rad = FOOD_SPAWN_RADIUS;
+        let size = FOOD_CHUNK_SIZE_RANGE;
+
+        let pos = headPos.add(
+            randi(-rad, rad),
+            randi(-rad, rad),
+        );
+        summonFoodChunk(pos, randi(size[0], size[1]+1))
+    }
 })
 
 // -------------- CELL CLEANUP --------------
@@ -514,7 +538,19 @@ onUpdate(() => {
 
     // Check if head overlaps with food
 
-    if (foodCells[toCSVPos(playerData.cellsPos[0])]) {
+    let potentialOverlappingFood = foodCells[toCSVPos(playerData.cellsPos[0])];
+
+    if (potentialOverlappingFood) {
+
+        // Is actually overlapping
+
+        foodChunksID[potentialOverlappingFood.id].amount -= 1;
+
+        if (foodChunksID[potentialOverlappingFood.id].amount == 0) {
+            // If all food cells in this chunk were eaten, delete the chunk
+            delete foodChunksID[potentialOverlappingFood.id];
+        }
+
         // Healing
         let totalHealing = 0;
 
