@@ -715,7 +715,9 @@ onDraw(() => {
 
     // --------- Draw Player Cells ---------
 
-    for (let [index, pos] of playerData.cellsPos.entries()) {
+    for (let index = playerData.cellsPos.length-1; index >= 0; index--) {
+        let pos = playerData.cellsPos[index];
+
         fillGridSpace(
             pos, 
             getPlayerCellColor(index), 
