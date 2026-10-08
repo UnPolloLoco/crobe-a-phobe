@@ -295,7 +295,7 @@ function summonFoodChunk(topLeftPos, size) {
     }
 
     if (hasOverlap) return; // Cancel creation if food exists here already
-    if (false /*gridIsOnScreen(topLeftPos, margin=5)*/) return; // Cancel creation if spawnpoint visible
+    if (gridIsOnScreen(topLeftPos, margin=5)) return; // Cancel creation if spawnpoint visible
 
     foodCells = {...foodCells, ...newFoodCells}
 
@@ -303,6 +303,25 @@ function summonFoodChunk(topLeftPos, size) {
         amount: size**2,
         pos: topLeftPos
     }
+}
+
+function gridIsOnScreen(pos, margin=0) {
+    let head = playerData.cellsPos[0];
+    let w = WIDTH_GRID/2 + margin + 1;
+    let h = HEIGHT_GRID/2 + margin + 1;
+
+    let left = head.x - w;
+    let right = head.x + w;
+    let top = head.y - h;
+    let bot = head.y + h;
+
+    if (left < pos.x && pos.x < right) {
+        if (top < pos.y && pos.y < bot) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 // -------------- SETUP --------------
