@@ -45,6 +45,11 @@ const FOOD_SPAWN_RADIUS = 130;
 const FOOD_DELETE_RADIUS = 150;
 const FOOD_CHUNK_SIZE_RANGE = [2,3];
 
+const VENOM_RANGE = 26;
+const VENOM_MIN_RANGE = 3;
+const VENOM_SPREAD = 0.1;
+const VENOM_SPEED = 100;
+
 // ------------------ LOADS ------------------
 
 loadBean();

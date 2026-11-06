@@ -68,8 +68,8 @@ function tickLife() {
             // Is Dead
             if ([3].includes(livingNeighborCount)) {
                 // Birth B3
-                if (!foodCells[pos]) {
-                    // Do not spawn cell if it will overlap with food
+                if (!foodCells[pos] && !venomCells[pos]) {
+                    // Do not spawn cell if it will overlap with FOOD or VENOM
                     nextLivingCells[pos] = {
                         birthTick: tickNumber
                     }
@@ -322,6 +322,31 @@ function gridIsOnScreen(pos, margin=0) {
     return false;
 }
 
+function shootVenom() {
+    let headPos = playerData.cellsPos[0];
+
+    for (let dist = VENOM_MIN_RANGE; dist < VENOM_RANGE; dist += 0.3) {
+        let fineTarget = headPos.add(playerData.direction.scale(dist));
+        fineTarget = fineTarget.add(
+            rand(-1,1) * dist * VENOM_SPREAD,
+            rand(-1,1) * dist * VENOM_SPREAD
+        );
+
+        let target = roundVec(fineTarget)
+
+        let appearanceDelay = (dist - VENOM_MIN_RANGE) / VENOM_SPEED;
+        
+        wait(appearanceDelay, () => {
+            venomCells[toCSVPos(target)] = {
+                birthTick: tickNumber,
+                originalDist: dist,
+            }
+
+            delete livingCells[toCSVPos(target)]
+        })
+    }
+}
+
 // -------------- SETUP --------------
 
 const GAME = {time: 0};
@@ -368,7 +393,8 @@ const playerData = {
     finePos: vec2(0),                       // exact head pos
     speed: 10,
     storedFood: 0,
-    direction: vec2(0),
+    velocity: vec2(0),                      // actual motion; can be zero
+    direction: vec2(0, -1),                 // movement direction; never zero
     generalDirection: {
         vec: vec2(0),
         lastPos: vec2(0),
@@ -403,6 +429,10 @@ let foodCells = {
 let foodChunksID = {
     // This is for tracking each clump of food as a single object
     // 67: {amount: 9, pos: vec2},
+}
+
+let venomCells = {
+    // '4,1': {birthTick: 0, originalDist: 5},
 }
 
 // -------------- INITAL SOUP --------------
@@ -516,6 +546,10 @@ loop(8, () => {
 
 // -------------- CONTROLS --------------
 
+onKeyPress('space', () => {
+    shootVenom();
+})
+
 onKeyPress(',', () => {
     CAMERA.scale /= 1.2;
 })
@@ -543,6 +577,7 @@ onUpdate(() => {
         );
 
         playerData.velocity = playerMouseDiff.unit();
+        playerData.direction = playerData.velocity;
     } else {
         playerData.velocity = vec2(0);
     }
@@ -709,6 +744,32 @@ onDraw(() => {
         }
     }
 
+    // --------- Draw Venom Cells ---------
+
+    for (let [pos, data] of Object.entries(venomCells)) {
+        let vecPos = fromCSVPos(pos);
+        let ticksElapsed = tickNumber - data.birthTick;
+
+        ticksElapsed *= 1 + (data.originalDist - VENOM_MIN_RANGE) / (VENOM_RANGE - VENOM_MIN_RANGE) / 3
+
+        let opacity = Math.min(1, 1 - (ticksElapsed-5)/30);
+        let brightnessJiggle = 0.3 * Math.sin(time() * 35) * Math.max(0.33, 1 - ticksElapsed/20);
+
+        fillGridSpace(
+            vecPos, 
+            hsl(
+                150 + ticksElapsed/3, 
+                0.85, 
+                Math.max(0.5, 1 - ticksElapsed/5/2) + brightnessJiggle
+            ),
+            opacity
+        );
+
+        if (opacity <= 0) {
+            delete venomCells[pos];
+        }
+    }
+
     // --------- Draw DEAD Player Cells ---------
 
     for (let [index, pos] of playerData.deadCellsPos.entries()) {
@@ -732,6 +793,8 @@ onDraw(() => {
 
     // --------- Draw 'Crobe Cells ---------
 
+    visibleCrobeCount = 0
+
     for (let [pos, data] of Object.entries(livingCells)) {
 
         let vecPos = fromCSVPos(pos);
@@ -742,8 +805,14 @@ onDraw(() => {
         let ticksElapsed = tickNumber - data.birthTick;
         let dist = vecPos.dist(vec2(0));
 
-        // Delete any cells that overlap with food
+        // Delete any cells that overlap with FOOD
         if (foodCells[pos]) {
+            delete livingCells[pos];
+            continue;
+        }
+
+        // Delete any cells that overlap with VENOM
+        if (venomCells[pos]) {
             delete livingCells[pos];
             continue;
         }
@@ -763,7 +832,11 @@ onDraw(() => {
             ),
             birthFadeMulti * deathFadeMulti * introFadeMulti,
         );
+
+        visibleCrobeCount++;
     }
+
+    // debug.log(visibleCrobeCount)
 
     // --------- Draw Food ---------
 
