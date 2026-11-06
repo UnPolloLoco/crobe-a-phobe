@@ -1,7 +1,5 @@
 scene("game", () => {
 
-
-
 // -------------- GAME FUNCTIONS --------------
 
 function fillGridSpace(pos, color, opacity=1) {
@@ -529,6 +527,10 @@ onKeyPress('e', () => {
     extendPlayer();
 })
 
+onKeyPress('i', () => {
+    debug.inspect = !debug.inspect;
+})
+
 // -------------- UPDATE LOOP --------------
 
 onUpdate(() => {
@@ -731,8 +733,13 @@ onDraw(() => {
     // --------- Draw 'Crobe Cells ---------
 
     for (let [pos, data] of Object.entries(livingCells)) {
-        let ticksElapsed = tickNumber - data.birthTick;
+
         let vecPos = fromCSVPos(pos);
+
+        // DO NOT DRAW if too far offscreen
+        if (gridIsOnScreen(vecPos) == false) { continue; }
+
+        let ticksElapsed = tickNumber - data.birthTick;
         let dist = vecPos.dist(vec2(0));
 
         // Delete any cells that overlap with food
@@ -771,7 +778,7 @@ onDraw(() => {
             vecPos, 
             hsl(
                 150 + Math.max(0, 20*shimmer), 
-                0.75,
+                0.8,
                 dimAmount * (0.86 + 0.14*(1 - 2**(1 + shimmer)))
             ),
         );
